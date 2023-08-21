@@ -1,35 +1,37 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect } from "react";
+import { tokenAtom } from "./token";
+import { useAtom } from "jotai";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [token, setToken] = useAtom(tokenAtom);
+
+  useEffect(() => {
+    const search = window.location.search;
+    const params = new URLSearchParams(search);
+    const newToken = params.get("token");
+    if (newToken) {
+      setToken(newToken);
+      window.location.replace(window.location.origin);
+    }
+  }, []);
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
+      {!token ? (
+        <a
+          href={`${import.meta.env.VITE_API_URL}/auth/google/authorize`}
+          rel="noreferrer"
+        >
+          sign in w google
         </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      ) : (
+        <>
+          <div>logged in</div>
+          <button onClick={() => setToken(undefined)}>logout</button>
+        </>
+      )}
     </>
-  )
+  );
 }
 
-export default App
+export default App;
