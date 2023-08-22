@@ -26,13 +26,13 @@ export function MyStack({ stack }: StackContext) {
     customDomain:
       stack.stage === "prod"
         ? {
-          domainName: "api.batt.rohan.zip",
+          domainName: "api.batt.rgodha.com",
           isExternalDomain: true,
           cdk: {
             certificate: Certificate.fromCertificateArn(
               stack,
               "api-cert",
-              "arn:aws:acm:us-east-1:634758516618:certificate/203252d3-e2d5-495e-9595-8031ba3eab1b"
+              "arn:aws:acm:us-west-1:634758516618:certificate/0f0d7c72-4ca8-4461-82d5-13794c168302"
             ),
           },
         }
@@ -54,13 +54,13 @@ export function MyStack({ stack }: StackContext) {
     customDomain:
       stack.stage === "prod"
         ? {
-          domainName: "batt.rohan.zip",
+          domainName: "fe.batt.rgodha.com",
           isExternalDomain: true,
           cdk: {
             certificate: Certificate.fromCertificateArn(
               stack,
               "frontend-cert",
-              "arn:aws:acm:us-east-1:634758516618:certificate/399d0acd-e2d8-4831-be56-6460b27e5fe1"
+              "arn:aws:acm:us-east-1:634758516618:certificate/a31ab2f6-b356-477a-a3c4-508124fd82f9"
             ),
           },
         }
@@ -68,7 +68,7 @@ export function MyStack({ stack }: StackContext) {
   });
 
   stack.addOutputs({
-    ApiEndpoint: api.url,
-    SiteUrl: site.url,
+    ApiEndpoint: api.customDomainUrl || api.url,
+    SiteUrl: site.customDomainUrl || site.url,
   });
 }
