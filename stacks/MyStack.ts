@@ -17,8 +17,11 @@ export function API({ stack }: StackContext) {
               : "http://localhost:5173",
         },
       },
+      // authorizer: "none",
     },
-    routes: {},
+    routes: {
+      "GET /trpc/{proxy+}": "packages/functions/src/trpc.handler",
+    },
   });
 
   auth.attach(stack, {

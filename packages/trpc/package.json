@@ -1,5 +1,5 @@
 {
-  "name": "@attendance/functions",
+  "name": "@attendance/trpc",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -7,13 +7,13 @@
     "typecheck": "tsc -noEmit"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.119",
     "@types/node": "^20.5.1",
     "sst": "^2.24.9",
     "vitest": "^0.34.2"
   },
   "dependencies": {
-    "@attendance/trpc": "workspace:*",
-    "@trpc/server": "^10.37.1"
-  }
+    "@trpc/server": "^10.37.1",
+    "zod": "^3.22.2"
+  },
+  "main": "src/router.ts"
 }

@@ -10,6 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@radix-ui/react-dropdown-menu": "^2.0.5",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@tanstack/react-query": "^4.33.0",
+    "@tanstack/react-router": "0.0.1-beta.151",
+    "@trpc/client": "^10.37.1",
+    "@trpc/react-query": "^10.37.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "jotai": "^2.3.1",
@@ -20,6 +26,7 @@
     "tailwindcss-animate": "^1.0.6"
   },
   "devDependencies": {
+    "@attendance/trpc": "workspace:*",
     "@types/node": "^20.5.1",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
