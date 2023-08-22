@@ -20,7 +20,6 @@ const ensureLoggedIn = () => {
   // if we just logged in, just keep going.
   if (newToken) {
     const store = createStore();
-
     store.set(tokenAtom, newToken);
 
     const redirectTo = params.get("redirect");

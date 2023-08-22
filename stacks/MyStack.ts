@@ -1,6 +1,7 @@
 import { StackContext, Api, StaticSite, Auth } from "sst/constructs";
+import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 
-export function API({ stack }: StackContext) {
+export function MyStack({ stack }: StackContext) {
   const auth = new Auth(stack, "auth", {
     authenticator: {
       handler: "packages/functions/src/auth.handler",
@@ -22,6 +23,20 @@ export function API({ stack }: StackContext) {
     routes: {
       "GET /trpc/{proxy+}": "packages/functions/src/trpc.handler",
     },
+    customDomain:
+      stack.stage === "prod"
+        ? {
+          domainName: "api.batt.rohan.zip",
+          isExternalDomain: true,
+          cdk: {
+            certificate: Certificate.fromCertificateArn(
+              stack,
+              "api-cert",
+              "arn:aws:acm:us-east-1:634758516618:certificate/203252d3-e2d5-495e-9595-8031ba3eab1b"
+            ),
+          },
+        }
+        : undefined,
   });
 
   auth.attach(stack, {
@@ -36,6 +51,20 @@ export function API({ stack }: StackContext) {
     environment: {
       VITE_API_URL: api.url,
     },
+    customDomain:
+      stack.stage === "prod"
+        ? {
+          domainName: "batt.rohan.zip",
+          isExternalDomain: true,
+          cdk: {
+            certificate: Certificate.fromCertificateArn(
+              stack,
+              "frontend-cert",
+              "arn:aws:acm:us-east-1:634758516618:certificate/399d0acd-e2d8-4831-be56-6460b27e5fe1"
+            ),
+          },
+        }
+        : undefined,
   });
 
   stack.addOutputs({
