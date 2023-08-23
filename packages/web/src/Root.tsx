@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { tokenAtom } from "./token";
 import { useAtom } from "jotai";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -13,22 +13,23 @@ export function Root() {
 
   const [token, setToken] = useAtom(tokenAtom);
 
-  const trpcClient = useMemo(
-    () =>
-      trpc.createClient({
-        links: [
-          httpBatchLink({
-            url: `${API}/trpc`,
-            headers() {
-              return {
-                Authorization: `Bearer ${token}`,
-              };
-            },
-          }),
-        ],
-      }),
-    [token]
-  );
+  const [trpcClient] = useState(() => {
+    const token = localStorage.getItem("token");
+    return trpc.createClient({
+      links: [
+        httpBatchLink({
+          url: `${API}/trpc`,
+          headers() {
+            return !!token
+              ? {
+                Authorization: `Bearer ${JSON.parse(token)}`,
+              }
+              : {};
+          },
+        }),
+      ],
+    });
+  });
 
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
