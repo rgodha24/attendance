@@ -25,6 +25,7 @@ const ensureAuthedMiddleware = t.middleware(({ ctx, next }) => {
     ctx: {
       ...ctx,
       session: ctx.session,
+      userID: ctx.session.properties.userID,
     },
   });
 });

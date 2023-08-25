@@ -5,7 +5,8 @@
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
-      "@attendance/core/*": ["../core/src/*"]
+      "@attendance/core/*": ["../core/src/*"],
+      "@attendance/trpc/*": ["../trpc/src/*"]
     }
   }
 }

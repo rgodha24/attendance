@@ -26,7 +26,6 @@
     "tailwindcss-animate": "^1.0.6"
   },
   "devDependencies": {
-    "@attendance/trpc": "workspace:*",
     "@types/node": "^20.5.1",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",

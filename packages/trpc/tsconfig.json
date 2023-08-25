@@ -2,6 +2,9 @@
   "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
     "module": "esnext",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "paths": {
+      "@attendance/core/*": ["../core/src/*"]
+    }
   }
 }

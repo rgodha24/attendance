@@ -1,7 +1,7 @@
 import { ApiHandler } from "sst/node/api";
 import { useSession } from "sst/node/auth";
 import { awsLambdaRequestHandler } from "@trpc/server/adapters/aws-lambda";
-import { appRouter } from "@attendance/trpc";
+import { appRouter } from "@attendance/trpc/router";
 
 export const handler = ApiHandler(async (req, ctx) => {
   console.log(req.headers.Authorization);

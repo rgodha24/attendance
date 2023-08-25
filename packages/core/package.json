@@ -7,11 +7,15 @@
     "typecheck": "tsc -noEmit"
   },
   "devDependencies": {
-    "vitest": "^0.34.2",
     "@types/node": "^20.5.1",
-    "sst": "^2.24.9"
+    "sst": "^2.24.9",
+    "vitest": "^0.34.2"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.398.0",
+    "@trpc/server": "^10.37.1",
+    "electrodb": "^2.9.1",
+    "ulid": "^2.3.0",
     "zod": "^3.22.2"
   }
 }

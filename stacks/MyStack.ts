@@ -1,10 +1,31 @@
-import { StackContext, Api, StaticSite, Auth } from "sst/constructs";
+import { StackContext, Api, StaticSite, Auth, Table } from "sst/constructs";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 
 export function MyStack({ stack }: StackContext) {
   const auth = new Auth(stack, "auth", {
     authenticator: {
       handler: "packages/functions/src/auth.handler",
+    },
+  });
+
+  const table = new Table(stack, "electrodb", {
+    fields: {
+      pk: "string",
+      sk: "string",
+      gsi1pk: "string",
+      gsi1sk: "string",
+      // gsi2pk: "string",
+      // gsi2sk: "string",
+    },
+    primaryIndex: {
+      partitionKey: "pk",
+      sortKey: "sk",
+    },
+    globalIndexes: {
+      gsi1: {
+        partitionKey: "gsi1pk",
+        sortKey: "gsi1sk",
+      },
     },
   });
 
@@ -17,7 +38,9 @@ export function MyStack({ stack }: StackContext) {
               ? "https://d3srpthy1layee.cloudfront.net"
               : "http://localhost:5173",
         },
+        bind: [table],
       },
+
       // authorizer: "none",
     },
     routes: {
