@@ -45,6 +45,7 @@ export function MyStack({ stack }: StackContext) {
     },
     routes: {
       "GET /trpc/{proxy+}": "packages/functions/src/trpc.handler",
+      "POST /trpc/{proxy+}": "packages/functions/src/trpc.handler",
     },
     customDomain:
       stack.stage === "prod"

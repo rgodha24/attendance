@@ -22,17 +22,10 @@ export async function byID({
   return class_.data[0];
 }
 
-export async function create({
-  userID,
-  students,
-}: {
-  userID: string;
-  students: Student[];
-}) {
+export async function create(args: Omit<ClassInner, "classID">) {
   const class_ = await ClassEntity.create({
     classID: ulid(),
-    userID,
-    students,
+    ...args,
   }).go();
 
   return class_.data;

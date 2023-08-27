@@ -10,11 +10,23 @@ const studentParser = z.object({
 
 export const classRouter = router({
   create: privateProcedure
-    .input(studentParser.array())
+    .input(
+      z.object({
+        students: z.array(studentParser),
+        period: z.string(),
+        semester: z.enum(["fall", "spring", "other"]),
+        name: z.string().min(2),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
+      let schoolYear = new Date().getFullYear();
+      // if it's before may, it's the previous school year still
+      if (new Date().getMonth() < 5) schoolYear--;
+
       const res = await Class.create({
         userID: ctx.userID,
-        students: input,
+        schoolYear,
+        ...input,
       });
 
       return res.classID;

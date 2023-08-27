@@ -10,6 +10,7 @@ import { Home } from "./routes/home";
 import { Login } from "./routes/login";
 import { createStore } from "jotai";
 import { tokenAtom } from "./token";
+import { AddClass } from "./routes/addClass";
 
 const ensureLoggedIn = () => {
   const token = localStorage.getItem("token");
@@ -60,7 +61,17 @@ const loginRoute = new Route({
   component: Login,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, loginRoute]);
+const addClassRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: "/addClass",
+  component: AddClass,
+});
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  loginRoute,
+  addClassRoute,
+]);
 
 const router = new Router({ routeTree });
 

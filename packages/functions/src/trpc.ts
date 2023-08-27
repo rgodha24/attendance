@@ -4,10 +4,7 @@ import { awsLambdaRequestHandler } from "@trpc/server/adapters/aws-lambda";
 import { appRouter } from "@attendance/trpc/router";
 
 export const handler = ApiHandler(async (req, ctx) => {
-  console.log(req.headers.Authorization);
   const session = useSession();
-
-  console.log(session, req.headers.Authorization);
 
   return awsLambdaRequestHandler({
     router: appRouter,
