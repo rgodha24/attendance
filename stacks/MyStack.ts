@@ -1,5 +1,4 @@
 import { StackContext, Api, StaticSite, Auth, Table } from "sst/constructs";
-import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 
 export function MyStack({ stack }: StackContext) {
   const auth = new Auth(stack, "auth", {
@@ -35,13 +34,11 @@ export function MyStack({ stack }: StackContext) {
         environment: {
           FRONTEND_URL:
             stack.stage === "prod"
-              ? "https://d3srpthy1layee.cloudfront.net"
+              ? "fe.batt.rgodha.com"
               : "http://localhost:5173",
         },
         bind: [table],
       },
-
-      // authorizer: "none",
     },
     routes: {
       "GET /trpc/{proxy+}": "packages/functions/src/trpc.handler",
@@ -49,17 +46,7 @@ export function MyStack({ stack }: StackContext) {
     },
     customDomain:
       stack.stage === "prod"
-        ? {
-          domainName: "api.batt.rgodha.com",
-          isExternalDomain: true,
-          cdk: {
-            certificate: Certificate.fromCertificateArn(
-              stack,
-              "api-cert",
-              "arn:aws:acm:us-west-1:634758516618:certificate/0f0d7c72-4ca8-4461-82d5-13794c168302"
-            ),
-          },
-        }
+        ? { domainName: "api.batt.rgodha.com", hostedZone: "batt.rgodha.com" }
         : undefined,
   });
 
@@ -77,17 +64,7 @@ export function MyStack({ stack }: StackContext) {
     },
     customDomain:
       stack.stage === "prod"
-        ? {
-          domainName: "fe.batt.rgodha.com",
-          isExternalDomain: true,
-          cdk: {
-            certificate: Certificate.fromCertificateArn(
-              stack,
-              "frontend-cert",
-              "arn:aws:acm:us-east-1:634758516618:certificate/a31ab2f6-b356-477a-a3c4-508124fd82f9"
-            ),
-          },
-        }
+        ? { domainName: "fe.batt.rgodha.com", hostedZone: "batt.rgodha.com" }
         : undefined,
   });
 

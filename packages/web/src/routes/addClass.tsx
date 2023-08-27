@@ -1,5 +1,5 @@
 import { trpc } from "@/lib/trpc";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -20,8 +20,9 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, MinusCircle, PlusCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 export const AddClass = () => {
   const toast = useToast();
@@ -29,8 +30,11 @@ export const AddClass = () => {
     students: z
       .object({
         email: z.string().email().optional(),
-        name: z.string(),
-        studentID: z.number(),
+        name: z.string().min(2, "name shouldn't be empty"),
+        studentID: z.coerce
+          .number()
+          .min(10_000, "Student ID must be 5 digits")
+          .max(99_999, "Student ID must be 5 digits"),
       })
       .array(),
     semester: z.enum(["fall", "spring", "other"] as const),
@@ -41,7 +45,7 @@ export const AddClass = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      students: [],
+      students: [{ name: "", studentID: "" as any }],
       semester: getCurrentSemester(),
       name: "",
       // TODO: when calendar integration is done, set default period
@@ -49,20 +53,41 @@ export const AddClass = () => {
     },
   });
 
+  const students = useFieldArray({ control: form.control, name: "students" });
+
   const mut = trpc.class.create.useMutation({
     onSuccess: (_data, { name }) => {
       toast.toast({
-        title: `class ${name} created successfully!`,
+        title: `Class created successfully!`,
+        description: `Class ${name} was created successfully!`,
       });
       form.reset();
     },
+    onError: (err) => {
+      toast.toast({
+        variant: "destructive",
+        title: "Error creating class",
+        description: `There was an error creating the class on the backend: ${err.message}`,
+        action: (
+          <ToastAction
+            altText="retry"
+            onClick={() => mut.mutate(form.getValues())}
+          >
+            Retry
+          </ToastAction>
+        ),
+      });
+    },
   });
-  const onSubmit = (data: z.infer<typeof formSchema>) => mut.mutate(data);
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
+    console.log(data);
+    mut.mutate(data);
+  };
 
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="px-4 space-y-4">
           <FormField
             control={form.control}
             name="semester"
@@ -122,6 +147,85 @@ export const AddClass = () => {
               </FormItem>
             )}
           />
+
+          {students.fields.map((field, index) => {
+            return (
+              <div
+                key={field.id}
+                className="flex flex-row gap-x-4 justify-between items-end"
+              >
+                <FormField
+                  control={form.control}
+                  name={`students.${index}.name`}
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Student's Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John Doe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`students.${index}.studentID`}
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Student ID</FormLabel>
+                      <FormControl>
+                        <Input placeholder="24534" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`students.${index}.email`}
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Student Email (optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="jdoe24@brophybroncos.org"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => {
+                    students.remove(index);
+                  }}
+                  size="icon"
+                  className="rounded-full"
+                  disabled={students.fields.length === 1}
+                >
+                  <MinusCircle className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => {
+                    students.insert(index + 1, {
+                      name: "",
+                      studentID: "" as any,
+                    });
+                  }}
+                  size="icon"
+                  className="rounded-full"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                </Button>
+              </div>
+            );
+          })}
+
           <Button type="submit" disabled={mut.isLoading}>
             {mut.isLoading ? (
               <>

@@ -71,7 +71,7 @@ export const ClassEntity = new Entity(
             },
             email: {
               type: "string",
-              required: false,
+              required: true,
             },
           },
         },

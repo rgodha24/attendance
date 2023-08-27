@@ -39,9 +39,17 @@ export function ThemeProvider({
   useEffect(() => {
     const root = window.document.documentElement;
 
-    root.classList.remove("light", "dark");
+    // @ts-ignore
+    if (!document.startViewTransition) {
+      root.classList.remove("light", "dark");
+      root.classList.add(theme);
+    }
 
-    root.classList.add(theme);
+    // @ts-ignore
+    document.startViewTransition(() => {
+      root.classList.remove("light", "dark");
+      root.classList.add(theme);
+    });
   }, [theme]);
 
   const value = {
