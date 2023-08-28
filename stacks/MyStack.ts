@@ -34,7 +34,7 @@ export function MyStack({ stack }: StackContext) {
         environment: {
           FRONTEND_URL:
             stack.stage === "prod"
-              ? "fe.batt.rgodha.com"
+              ? "https://fe.batt.rgodha.com"
               : "http://localhost:5173",
         },
         bind: [table],
@@ -64,7 +64,11 @@ export function MyStack({ stack }: StackContext) {
     },
     customDomain:
       stack.stage === "prod"
-        ? { domainName: "fe.batt.rgodha.com", hostedZone: "batt.rgodha.com" }
+        ? {
+          domainName: "fe.batt.rgodha.com",
+          domainAlias: "batt.rgodha.com",
+          hostedZone: "batt.rgodha.com",
+        }
         : undefined,
   });
 
