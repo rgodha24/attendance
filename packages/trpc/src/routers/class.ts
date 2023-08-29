@@ -3,7 +3,8 @@ import { privateProcedure, router } from "../trpc";
 import { z } from "zod";
 
 const studentParser = z.object({
-  studentID: z.coerce.number(),
+  // student ids are 5 digits
+  studentID: z.coerce.number().min(10_000).max(99_999),
   name: z.string(),
   email: z.string().email().optional(),
 });

@@ -1,4 +1,11 @@
-import { StackContext, Api, StaticSite, Auth, Table } from "sst/constructs";
+import {
+  StackContext,
+  Api,
+  StaticSite,
+  Auth,
+  Table,
+  WebSocketApi,
+} from "sst/constructs";
 
 export function MyStack({ stack }: StackContext) {
   const auth = new Auth(stack, "auth", {
@@ -43,6 +50,7 @@ export function MyStack({ stack }: StackContext) {
     routes: {
       "GET /trpc/{proxy+}": "packages/functions/src/trpc.handler",
       "POST /trpc/{proxy+}": "packages/functions/src/trpc.handler",
+      "POST /signin": "packages/functions/src/signin.handler",
     },
     customDomain:
       stack.stage === "prod"
@@ -55,12 +63,28 @@ export function MyStack({ stack }: StackContext) {
     prefix: "/auth",
   });
 
+  const ws = new WebSocketApi(stack, "ws", {
+    routes: {
+      $connect: "packages/functions/src/ws.connect",
+      $disconnect: "packages/functions/src/ws.disconnect",
+    },
+    customDomain:
+      stack.stage === "prod"
+        ? {
+          domainName: "api.batt.rgodha.com",
+          hostedZone: "batt.rgodha.com",
+          path: "ws",
+        }
+        : undefined,
+  });
+
   const site = new StaticSite(stack, "site", {
     path: "packages/web",
     buildOutput: "dist",
     buildCommand: "pnpm build",
     environment: {
       VITE_API_URL: api.url,
+      VITE_WS_URL: ws.url,
     },
     customDomain:
       stack.stage === "prod"
@@ -75,5 +99,6 @@ export function MyStack({ stack }: StackContext) {
   stack.addOutputs({
     ApiEndpoint: api.customDomainUrl || api.url,
     SiteUrl: site.customDomainUrl || site.url,
+    WsUrl: ws.customDomainUrl || ws.url,
   });
 }

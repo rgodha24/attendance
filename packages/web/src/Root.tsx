@@ -6,8 +6,9 @@ import { Outlet } from "@tanstack/react-router";
 import { Navbar } from "./components/Navbar";
 import { ThemeProvider } from "./lib/themeProvider";
 import { Toaster } from "./components/ui/toaster";
+import superjson from "superjson";
 
-const API = import.meta.env.VITE_API_URL;
+export const API = import.meta.env.VITE_API_URL;
 
 export function Root() {
   const [queryClient] = useState(() => new QueryClient());
@@ -27,6 +28,7 @@ export function Root() {
           },
         }),
       ],
+      transformer: superjson,
     });
   });
 

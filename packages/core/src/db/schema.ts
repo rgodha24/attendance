@@ -125,7 +125,96 @@ export const ClassEntity = new Entity(
   { client, table: tableName }
 );
 
-// export const ScannerEntity = new Entity({
-//
-// })
-//
+export const SignInEntity = new Entity(
+  {
+    model: { entity: "SignIn", version: "1", service: "attendance" },
+    attributes: {
+      userID: {
+        type: "string",
+        required: true,
+      },
+      studentID: {
+        type: "number",
+        required: true,
+      },
+      scannerName: {
+        type: "string",
+        required: true,
+      },
+      time: {
+        type: "number",
+        required: true,
+        default: () => Date.now(),
+        readOnly: true,
+      },
+      signInID: {
+        type: "string",
+        required: true,
+      },
+    },
+    indexes: {
+      signins: {
+        pk: {
+          field: "pk",
+          composite: ["userID"],
+        },
+        sk: {
+          field: "sk",
+          composite: ["time", "scannerName"],
+        },
+      },
+      // byStudentId: {
+      //   index: "gsi1",
+      //   pk: {
+      //     field: "gsi1pk",
+      //     composite: ["userID", "scannerName", "studentID"],
+      //   },
+      //   sk: {
+      //     field: "gsi1sk",
+      //     composite: ["time"],
+      //   },
+      // },
+    },
+  },
+  { client, table: tableName }
+);
+
+export const ConnectionEntity = new Entity(
+  {
+    model: { entity: "Connections", version: "1", service: "attendance" },
+    attributes: {
+      connectionID: {
+        type: "string",
+        required: true,
+      },
+      userID: {
+        type: "string",
+        required: true,
+      },
+    },
+    indexes: {
+      connections: {
+        pk: {
+          field: "pk",
+          composite: ["userID"],
+        },
+        sk: {
+          field: "sk",
+          composite: ["connectionID"],
+        },
+      },
+      id: {
+        index: "gsi1",
+        pk: {
+          field: "gsi1pk",
+          composite: ["connectionID"],
+        },
+        sk: {
+          field: "gsi1sk",
+          composite: [],
+        },
+      },
+    },
+  },
+  { client, table: tableName }
+);

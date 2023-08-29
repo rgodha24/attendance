@@ -13,7 +13,7 @@ export const Navbar = () => {
     <div className="h-[10%] bg-background">
       <div className="flex justify-between items-center px-4 h-full">
         <h1 className="text-4xl text-primary">
-          <Link to="/">BROPHY ATTENDANCE</Link>
+          <Link to="/">BROPHY ATTENDANCE {import.meta.env.DEV && "(dev)"}</Link>
         </h1>
         <div className="">
           <Button

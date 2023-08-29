@@ -1,5 +1,6 @@
 import { TRPCError, initTRPC } from "@trpc/server";
 import { SessionValue } from "sst/node/auth";
+import superjson from "superjson";
 
 declare module "sst/node/auth" {
   export interface SessionTypes {
@@ -13,7 +14,7 @@ type Context = {
   session: SessionValue;
 };
 
-const t = initTRPC.context<Context>().create();
+const t = initTRPC.context<Context>().create({ transformer: superjson });
 
 const ensureAuthedMiddleware = t.middleware(({ ctx, next }) => {
   if (ctx.session.type === "public") {

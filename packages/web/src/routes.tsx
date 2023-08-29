@@ -59,12 +59,17 @@ const loginRoute = new Route({
   getParentRoute: () => rootRoute,
   path: "/login",
   component: Login,
+  beforeLoad: () => {
+    const token = localStorage.getItem("token");
+    if (!!token) router.history.push("/");
+  },
 });
 
 const addClassRoute = new Route({
   getParentRoute: () => rootRoute,
   path: "/addClass",
   component: AddClass,
+  beforeLoad: ensureLoggedIn,
 });
 
 const routeTree = rootRoute.addChildren([

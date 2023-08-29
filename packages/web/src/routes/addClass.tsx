@@ -161,7 +161,7 @@ export const AddClass = () => {
                     <FormItem className="flex-1">
                       <FormLabel>Student's Full Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="John Doe" {...field} />
+                        <Input placeholder="Johnny Bronco" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -188,7 +188,7 @@ export const AddClass = () => {
                       <FormLabel>Student Email (optional)</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="jdoe24@brophybroncos.org"
+                          placeholder="jbronco24@brophybroncos.org"
                           {...field}
                         />
                       </FormControl>
@@ -203,10 +203,10 @@ export const AddClass = () => {
                     students.remove(index);
                   }}
                   size="icon"
-                  className="rounded-full"
+                  className="rounded-full group"
                   disabled={students.fields.length === 1}
                 >
-                  <MinusCircle className="w-4 h-4" />
+                  <MinusCircle className="w-4 h-4 dark:group-hover:stroke-red-400 group-hover:stroke-red-600" />
                 </Button>
                 <Button
                   variant="outline"
@@ -218,9 +218,9 @@ export const AddClass = () => {
                     });
                   }}
                   size="icon"
-                  className="rounded-full"
+                  className="rounded-full group"
                 >
-                  <PlusCircle className="w-4 h-4" />
+                  <PlusCircle className="w-4 h-4 dark:group-hover:stroke-green-400 group-hover:stroke-green-600" />
                 </Button>
               </div>
             );

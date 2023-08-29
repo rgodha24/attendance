@@ -1,0 +1,18 @@
+import { SignIn } from "@attendance/core/db/signin";
+import { ApiHandler } from "sst/node/api";
+import { z } from "zod";
+
+export const handler = ApiHandler(async (req, ctx) => {
+  const schema = z.object({
+    studentID: z.coerce.number().min(10_000).max(99_999),
+    scannerName: z.coerce.string(),
+    userID: z.string().min(6),
+  });
+
+  const data = schema.safeParse(req.queryStringParameters);
+
+  if (!data.success) return { statusCode: 400, body: data.error.message };
+
+  const signin = await SignIn.create(data.data);
+  console.table(signin);
+});
