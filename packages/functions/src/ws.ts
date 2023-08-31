@@ -32,7 +32,11 @@ export const auth = WebSocketApiHandler(async (event) => {
   if (!connectionID) return { statusCode: 400 };
 
   const data = schema.safeParse(JSON.parse(event.body ?? "{}"));
-  if (!data.success) return deleteConnection(event.requestContext.connectionId);
+  if (!data.success) {
+    console.log("body is wrong", data.error);
+
+    return deleteConnection(event.requestContext.connectionId);
+  }
 
   const { data: con } = await UnauthedConnectionEntity.query
     .connections({ connectionID })

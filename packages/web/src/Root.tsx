@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { trpc } from "./lib/trpc";
@@ -33,9 +34,10 @@ export function Root() {
   });
 
   useEffect(() => {
-    window.addEventListener("signin", () =>
-      queryClient.invalidateQueries(["signins"])
-    );
+    window.addEventListener("signin", () => {
+      console.log("invalidating queries");
+      queryClient.invalidateQueries(["signins"]);
+    });
   }, [queryClient]);
 
   return (
@@ -45,6 +47,7 @@ export function Root() {
           <Navbar />
           <Outlet />
           <Toaster />
+          {import.meta.env.DEV && <ReactQueryDevtools />}
         </ThemeProvider>
       </QueryClientProvider>
     </trpc.Provider>
