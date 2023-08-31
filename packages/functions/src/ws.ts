@@ -1,39 +1,95 @@
-import type { APIGatewayProxyEvent, APIGatewayProxyHandler } from "aws-lambda";
-import { ConnectionEntity } from "@attendance/core/db/schema";
-import { ApiHandler } from "sst/node/api";
-import { useSession } from "sst/node/auth";
+import type { APIGatewayProxyEvent } from "aws-lambda";
+import { createVerifier } from "fast-jwt";
+import {
+  ConnectionEntity,
+  UnauthedConnectionEntity,
+} from "@attendance/core/db/schema";
+import { z } from "zod";
+import { SessionValue, getPublicKey } from "sst/node/auth";
+import { WebSocketApiHandler } from "sst/node/websocket-api";
 
-export const connect = ApiHandler(async (e) => {
-  // need ApiHandler for auth, but there are no types for it
-  const event = e as unknown as APIGatewayProxyEvent;
-  const session = useSession();
-  if (session.type === "public") return { statusCode: 401 };
+export const connect = async (event: APIGatewayProxyEvent) => {
   const connectionID = event.requestContext.connectionId;
   if (!connectionID) return { statusCode: 400 };
 
-  await ConnectionEntity.create({
-    userID: session.properties.userID,
+  const con = await UnauthedConnectionEntity.create({
     connectionID,
+    connectionDate: Date.now(),
   }).go();
 
-  return { statusCode: 200, body: "Connected" };
-});
+  const { stage, domainName } = event.requestContext;
+  console.log(`${domainName}/${stage}`);
 
-export const disconnect = ApiHandler(async (e) => {
-  // need ApiHandler for auth, but there are no types for it
-  const event = e as unknown as APIGatewayProxyEvent;
+  console.log(con);
+};
+
+export const auth = WebSocketApiHandler(async (event) => {
+  const schema = z.object({
+    data: z.string(),
+    action: z.literal("auth"),
+  });
   const connectionID = event.requestContext.connectionId;
   if (!connectionID) return { statusCode: 400 };
-  const session = useSession();
 
-  if (session.type === "public") {
-    const conn = await ConnectionEntity.query.id({ connectionID }).go();
+  const data = schema.safeParse(JSON.parse(event.body ?? "{}"));
+  if (!data.success) return deleteConnection(event.requestContext.connectionId);
 
-    if (conn.data.length === 0) return { statusCode: 404 };
+  const { data: con } = await UnauthedConnectionEntity.query
+    .connections({ connectionID })
+    .go();
 
-    await ConnectionEntity.delete(conn.data[0]).go();
-    return { statusCode: 200, body: "Disconnected" };
-  } else {
-    await ConnectionEntity.delete({ userID: session.properties.userID, connectionID }).go()
-  }
+  await Promise.all(con.map((c) => UnauthedConnectionEntity.delete(c).go()));
+
+  const jwt = createVerifier({
+    algorithms: ["RS512"],
+    key: getPublicKey(),
+  })(data.data.data) as SessionValue;
+
+  if (jwt.type !== "user") return deleteConnection(connectionID);
+
+  await ConnectionEntity.create({
+    connectionID,
+    userID: jwt.properties.userID,
+  }).go();
+
+  return {
+    statusCode: 200,
+    body: "authed",
+  };
 });
+
+export const disconnect = async (event: APIGatewayProxyEvent) => {
+  const connectionID = event.requestContext.connectionId;
+  if (!connectionID) return { statusCode: 400 };
+
+  console.log("disconnecting", connectionID);
+
+  const { data: authedConns } = await ConnectionEntity.query
+    .id({ connectionID })
+    .go();
+
+  const { data: unauthedConns } = await UnauthedConnectionEntity.query
+    .id({ connectionID })
+    .go();
+
+  await Promise.all([
+    ...authedConns.map((c) => ConnectionEntity.delete(c).go()),
+    ...unauthedConns.map((c) => UnauthedConnectionEntity.delete(c).go()),
+  ]);
+
+  return { statusCode: 200, body: "Disconnected" };
+};
+
+import { ApiGatewayManagementApi } from "@aws-sdk/client-apigatewaymanagementapi";
+import { Config } from "sst/node/config";
+
+async function deleteConnection(connectionID: string) {
+  const wsURL = Config.wsURL.replace("wss://", "https://");
+  const manager = new ApiGatewayManagementApi({ endpoint: wsURL });
+
+  await manager.deleteConnection({ ConnectionId: connectionID });
+
+  return {
+    statusCode: 401,
+  };
+}

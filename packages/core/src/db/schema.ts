@@ -218,3 +218,47 @@ export const ConnectionEntity = new Entity(
   },
   { client, table: tableName }
 );
+
+export const UnauthedConnectionEntity = new Entity(
+  {
+    model: {
+      entity: "UnauthedConnections",
+      version: "1",
+      service: "attendance",
+    },
+    attributes: {
+      connectionID: {
+        type: "string",
+        required: true,
+      },
+      connectionDate: {
+        type: "number",
+        required: true,
+      },
+    },
+    indexes: {
+      connections: {
+        pk: {
+          field: "pk",
+          composite: ["connectionID"],
+        },
+        sk: {
+          field: "sk",
+          composite: ["connectionDate"],
+        },
+      },
+      id: {
+        index: "gsi1",
+        pk: {
+          field: "gsi1pk",
+          composite: ["connectionID"],
+        },
+        sk: {
+          field: "gsi1sk",
+          composite: [],
+        },
+      },
+    },
+  },
+  { client, table: tableName }
+);

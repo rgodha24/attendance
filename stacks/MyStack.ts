@@ -5,6 +5,7 @@ import {
   Auth,
   Table,
   WebSocketApi,
+  Config,
 } from "sst/constructs";
 
 export function MyStack({ stack }: StackContext) {
@@ -38,12 +39,6 @@ export function MyStack({ stack }: StackContext) {
   const api = new Api(stack, "api", {
     defaults: {
       function: {
-        environment: {
-          FRONTEND_URL:
-            stack.stage === "prod"
-              ? "https://fe.batt.rgodha.com"
-              : "http://localhost:5173",
-        },
         bind: [table],
       },
     },
@@ -51,9 +46,10 @@ export function MyStack({ stack }: StackContext) {
       "GET /trpc/{proxy+}": "packages/functions/src/trpc.handler",
       "POST /trpc/{proxy+}": "packages/functions/src/trpc.handler",
       "POST /signin": "packages/functions/src/signin.handler",
+      "POST /changeScanner": "packages/functions/src/changeScanner.handler",
     },
     customDomain:
-      stack.stage === "prod"
+      stack.stage === "production"
         ? { domainName: "api.batt.rgodha.com", hostedZone: "batt.rgodha.com" }
         : undefined,
   });
@@ -67,15 +63,20 @@ export function MyStack({ stack }: StackContext) {
     routes: {
       $connect: "packages/functions/src/ws.connect",
       $disconnect: "packages/functions/src/ws.disconnect",
+      auth: "packages/functions/src/ws.auth",
     },
     customDomain:
-      stack.stage === "prod"
+      stack.stage === "production"
         ? {
-          domainName: "api.batt.rgodha.com",
+          domainName: "ws.batt.rgodha.com",
           hostedZone: "batt.rgodha.com",
-          path: "ws",
         }
         : undefined,
+    defaults: {
+      function: {
+        bind: [table, auth],
+      },
+    },
   });
 
   const site = new StaticSite(stack, "site", {
@@ -87,7 +88,7 @@ export function MyStack({ stack }: StackContext) {
       VITE_WS_URL: ws.url,
     },
     customDomain:
-      stack.stage === "prod"
+      stack.stage === "production"
         ? {
           domainName: "fe.batt.rgodha.com",
           domainAlias: "batt.rgodha.com",
@@ -95,6 +96,21 @@ export function MyStack({ stack }: StackContext) {
         }
         : undefined,
   });
+
+  const wsURL = new Config.Parameter(stack, "wsURL", {
+    value: ws.customDomainUrl || ws.url,
+  });
+
+  const frontendURL = new Config.Parameter(stack, "frontendURL", {
+    value: site.customDomainUrl || site.url || "http://localhost:5173",
+  });
+
+  const apiURL = new Config.Parameter(stack, "apiURL", {
+    value: api.customDomainUrl || api.url,
+  });
+
+  api.bind([wsURL, frontendURL, ws, apiURL]);
+  ws.bind([wsURL]);
 
   stack.addOutputs({
     ApiEndpoint: api.customDomainUrl || api.url,

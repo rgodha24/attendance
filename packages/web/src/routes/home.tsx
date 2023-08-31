@@ -1,22 +1,23 @@
-// import { getSignins } from "@/lib/duckdb";
 import { Button } from "@/components/ui/button";
-import { trpc } from "@/lib/trpc";
-// import { useState } from "react";
+// import { trpc } from "@/lib/trpc";
+import { useSignins } from "@/lib/useSignins";
+import { useWsConnection } from "@/lib/ws";
 
 export const Home = () => {
-  const hello = trpc.hello.useQuery();
-  const signins = trpc.signIn.get.useQuery({});
+  const signins = useSignins({
+    scannerName: "test",
+    start: new Date(2023, 8, 29),
+    end: new Date(),
+  });
 
-  if (hello.isLoading) return "Loading...";
-  if (hello.isError) return hello.error.message;
+  useWsConnection();
 
   return (
     <>
-      <div>hello: {hello.data}</div>
-
       {JSON.stringify(signins.data, null, 2)}
       <br />
       <Button onClick={() => signins.refetch()}>refetch</Button>
+      {signins.data?.length}
     </>
   );
 };

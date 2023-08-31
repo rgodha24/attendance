@@ -1,4 +1,5 @@
 import { AuthHandler, GoogleAdapter, Session } from "sst/node/auth";
+import { Config } from "sst/node/config";
 
 export const handler = AuthHandler({
   providers: {
@@ -13,7 +14,7 @@ export const handler = AuthHandler({
 
         return Session.parameter({
           type: "user",
-          redirect: process.env.FRONTEND_URL!,
+          redirect: Config.frontendURL,
           properties: {
             userID: claims.sub,
           },

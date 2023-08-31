@@ -1,8 +1,9 @@
 import { SignIn } from "@attendance/core/db/signin";
 import { ApiHandler } from "sst/node/api";
 import { z } from "zod";
+import { sendMessage } from "@attendance/core/message/send";
 
-export const handler = ApiHandler(async (req, ctx) => {
+export const handler = ApiHandler(async (req) => {
   const schema = z.object({
     studentID: z.coerce.number().min(10_000).max(99_999),
     scannerName: z.coerce.string(),
@@ -15,4 +16,14 @@ export const handler = ApiHandler(async (req, ctx) => {
 
   const signin = await SignIn.create(data.data);
   console.table(signin);
+
+  await sendMessage(signin.userID, {
+    type: "signin",
+    time: new Date(signin.time),
+    studentID: signin.studentID,
+    scannerName: signin.scannerName,
+    id: signin.signInID,
+  });
+
+  return { statusCode: 200, body: "OK" };
 });

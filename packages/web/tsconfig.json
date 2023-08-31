@@ -26,6 +26,9 @@
       "@attendance/trpc/*": [
         "../trpc/src/*"
       ],
+      "@attendance/core/*": [
+        "../core/src/*"
+      ],
       "@/*": [
         "src/*"
       ]

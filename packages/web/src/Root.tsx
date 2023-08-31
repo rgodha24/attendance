@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { trpc } from "./lib/trpc";
@@ -31,6 +31,12 @@ export function Root() {
       transformer: superjson,
     });
   });
+
+  useEffect(() => {
+    window.addEventListener("signin", () =>
+      queryClient.invalidateQueries(["signins"])
+    );
+  }, [queryClient]);
 
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
