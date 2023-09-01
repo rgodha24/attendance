@@ -84,8 +84,8 @@ export function MyStack({ stack }: StackContext) {
     buildOutput: "dist",
     buildCommand: "pnpm build",
     environment: {
-      VITE_API_URL: api.url,
-      VITE_WS_URL: ws.url,
+      VITE_API_URL: api.customDomainUrl || api.url,
+      VITE_WS_URL: ws.customDomainUrl || ws.url,
     },
     customDomain:
       stack.stage === "production"

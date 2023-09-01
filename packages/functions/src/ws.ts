@@ -21,6 +21,8 @@ export const connect = async (event: APIGatewayProxyEvent) => {
   console.log(`${domainName}/${stage}`);
 
   console.log(con);
+
+  return { statusCode: 200, body: "connected" };
 };
 
 export const auth = WebSocketApiHandler(async (event) => {
