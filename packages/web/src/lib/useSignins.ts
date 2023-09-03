@@ -14,5 +14,4 @@ export const useSignins = ({
     queryKey: ["signins", scannerName, start, end] as const,
     queryFn: async ({ queryKey: [, scannerName, start, end] }) =>
       getSignIns({ scannerName, start, end }),
-    refetchInterval: false,
   });

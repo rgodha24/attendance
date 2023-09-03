@@ -13,8 +13,8 @@ type Functions = {
 };
 
 export const datesStore = create<Values & Functions>((set) => ({
-  start: new Date(),
-  end: setHours(new Date(), new Date().getHours() + 1),
+  start: setHours(new Date(), new Date().getHours() - 1),
+  end: new Date(),
   setStart: (_date) => {
     set(({ start, end }) => {
       let date: Date;
@@ -24,11 +24,10 @@ export const datesStore = create<Values & Functions>((set) => ({
       if (date.getTime() >= end.getTime()) {
         toast({
           variant: "destructive",
-          title:
-            "Start time must be before end time. Setting start time to 1 minute before end time",
+          title: "Start time must be before end time",
         });
-        return { start: setMinutes(date, end.getMinutes() - 1) };
-      } else return { start: date };
+      }
+      return { start: date };
     });
   },
   setEnd: (_date) => {

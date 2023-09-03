@@ -32,7 +32,7 @@ export async function sendMessage(userID: string, message: Message) {
         }).go();
       }
 
-      console.log("failed to post to uid", userID, e);
+      console.error("failed to post to uid", userID, "conn", ConnectionId);
     }
   };
 

@@ -1,7 +1,8 @@
 import { toast } from "@/components/ui/use-toast";
-import { isDate } from "util/types";
+import { scannerNameAtom, selectedClassAtom } from "@/routes/home";
+import { createStore } from "jotai";
 
-type SignIn = {
+export type SignIn = {
   scannerName: string;
   time: Date;
   id: string;
@@ -10,6 +11,7 @@ type SignIn = {
 
 export function getDB() {
   return new Promise<IDBDatabase>((resolve, reject) => {
+    console.log("getting db");
     const req = indexedDB.open("attendance", 1);
     req.onerror = () => reject(req.error);
     req.onsuccess = () => resolve(req.result);
@@ -30,6 +32,7 @@ export async function getSignIns({
   start: Date;
   end: Date;
 }): Promise<SignIn[]> {
+  console.log("getting signins for ", scannerName);
   return new Promise<SignIn[]>(async (resolve, reject) => {
     const db = await getDB();
     const transaction = db.transaction(["signins"], "readonly");
@@ -62,6 +65,33 @@ export async function getSignIns({
   });
 }
 
+export async function getAllScannerNames() {
+  return new Promise<string[]>(async (resolve, reject) => {
+    const db = await getDB();
+    const transaction = db.transaction(["signins"], "readonly");
+    const store = transaction.objectStore("signins");
+    const scannerIndex = store.index("scannerNameidx");
+
+    const scannerNames = new Set<string>();
+
+    const request = scannerIndex.openKeyCursor();
+
+    request.onsuccess = () => {
+      const cursor = request.result;
+      if (cursor) {
+        scannerNames.add(cursor.key as string);
+        cursor.continue();
+      } else {
+        resolve([...scannerNames]);
+      }
+    };
+
+    request.onerror = () => {
+      reject(new Error("Error fetching scanner names"));
+    };
+  });
+}
+
 export async function addSignIn({
   scannerName,
   time,
@@ -78,15 +108,23 @@ export async function addSignIn({
     const transaction = db.transaction(["signins"], "readwrite");
     const store = transaction.objectStore("signins");
 
-    const signIn = { scannerName, time, id, studentID };
+    const request = store.add({ scannerName, time, id, studentID });
 
-    const request = store.add(signIn);
-
-    request.onsuccess = () => {
+    transaction.oncomplete = () => {
       window.dispatchEvent(new CustomEvent("signin"));
+      const store = createStore();
+      const currentClass = store.get(selectedClassAtom);
+      const currentScanner = store.get(scannerNameAtom);
+      const name = currentClass?.students.find(
+        (student) => student.studentID === studentID
+      )?.name;
+
       toast({
-        title: `${studentID} signed in`,
+        title:
+          `${!!name ? name : studentID} signed in` +
+          (currentScanner ? ` on scanner ${currentScanner}` : ""),
       });
+
       resolve();
     };
 

@@ -27,7 +27,9 @@ export function useWsConnection() {
           console.log("error adding sigin", e);
         }
       } else if (m.type === "scannerConnected") {
+        window.dispatchEvent(new CustomEvent("scanner"));
       } else if (m.type === "scannerDisconnected") {
+        window.dispatchEvent(new CustomEvent("scanner"));
       }
     };
 

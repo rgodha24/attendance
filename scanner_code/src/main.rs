@@ -1,32 +1,38 @@
-use std::sync::Arc;
+use std::{
+    sync::{Arc, Mutex, OnceLock},
+    thread,
+};
 
-use tokio::sync::{mpsc::channel, Mutex};
+use tokio::sync::mpsc::channel;
+
+static SCANNER_NAME: OnceLock<String> = OnceLock::new();
+static UID: Mutex<String> = Mutex::new(String::new());
 
 #[tokio::main]
 async fn main() {
-    let user_id = Arc::new(Mutex::new(String::new()));
-    let uid2 = user_id.clone();
     let args = std::env::args().collect::<Vec<String>>();
 
     let (sender, mut receiver) = channel::<usize>(10);
-
-    tokio::spawn(async move {
-        while let Some(id) = receiver.recv().await {
-            let user_id = { uid2.lock().await.clone() };
-            if user_id.is_empty() {
-                println!("No UID set, not sending id {id}");
-                continue;
-            }
-            signin(&user_id, "test", id).await;
-        }
-    });
-
-    println!("using server_url = {}", SERVER_URL);
 
     let scanner_name = args.get(1).expect("No scanner name provided");
     if scanner_name.len() < 2 {
         panic!("Scanner name must be at least 2 characters long");
     }
+
+    SCANNER_NAME.set(scanner_name.to_string()).unwrap();
+
+    tokio::spawn(async move {
+        while let Some(id) = receiver.recv().await {
+            let user_id = { UID.lock().unwrap().clone() };
+            if user_id.is_empty() {
+                println!("No UID set, not sending id {id}");
+                continue;
+            }
+            signin(&user_id, &SCANNER_NAME.get().unwrap(), id).await;
+        }
+    });
+
+    println!("using server_url = {}", SERVER_URL);
 
     loop {
         let mut line = String::new();
@@ -50,7 +56,7 @@ async fn main() {
                 }
             }
             20 | 21 | 22 => {
-                change_uid(&user_id, line, scanner_name).await;
+                change_uid(line, scanner_name).await;
             }
             _ => {
                 println!("Invalid input: {}", line);
@@ -84,13 +90,13 @@ async fn signin(user_id: &str, scanner_name: &str, student_id: usize) {
     }
 }
 
-async fn change_uid(old: &Mutex<String>, new: &str, scanner_name: &str) {
+async fn change_uid(new: &str, scanner_name: &str) {
     let client = reqwest::Client::new();
     let url = format!("{}/changeScanner", SERVER_URL);
     let mut query = vec![("newUID", new), ("scannerName", scanner_name)];
 
     // intentionally hold the lock on uid
-    let mut old_uid = old.lock().await;
+    let mut old_uid = UID.lock().unwrap();
 
     if !old_uid.is_empty() {
         query.push(("oldUID", &old_uid));
