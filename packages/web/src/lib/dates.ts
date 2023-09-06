@@ -14,7 +14,7 @@ type Functions = {
 
 export const datesStore = create<Values & Functions>((set) => ({
   start: setHours(new Date(), new Date().getHours() - 1),
-  end: new Date(),
+  end: setMinutes(new Date(), new Date().getMinutes() + 10),
   setStart: (_date) => {
     set(({ start, end }) => {
       let date: Date;

@@ -1,36 +1,21 @@
+import { ClassSelect, ScannerSelect } from "@/components/selectors";
+import { NotInClass, NotSignedIn, SignedIn } from "@/components/tables";
 import { DateTimePicker } from "@/components/ui/date-picker";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { datesStore } from "@/lib/dates";
 import { SignIn, getAllScannerNames } from "@/lib/idb";
 import { trpc } from "@/lib/trpc";
 import { useSignins } from "@/lib/useSignins";
 import { useWsConnection } from "@/lib/ws";
 import { useQuery } from "@tanstack/react-query";
-import { formatDistanceStrict } from "date-fns";
 import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { useEffect, useMemo, useState } from "react";
 import { useStore } from "zustand";
 
-type Class = {
+export type Class = {
   name: string;
   students: { studentID: number; name: string }[];
+  classID: string;
 };
 
 export const selectedClassAtom = atomWithStorage<Class | undefined>(
@@ -46,8 +31,8 @@ export const Home = () => {
   const classes = trpc.class.getAll.useQuery(undefined, {
     refetchInterval: false,
   });
-  const [selectedClass, setSelectedClass] = useAtom(selectedClassAtom);
-  const [scannerName, setScannerName] = useAtom(scannerNameAtom);
+  const [selectedClass] = useAtom(selectedClassAtom);
+  const [scannerName] = useAtom(scannerNameAtom);
   let [now, setNow] = useState(new Date());
 
   useWsConnection();
@@ -63,13 +48,11 @@ export const Home = () => {
   });
 
   const { signedIn, notSignedIn, notInClass } = useMemo(() => {
-    console.log("rerunning!!!");
     if (signins.data === undefined)
       return { signedIn: [], notSignedIn: [], notInClass: [] };
     else if (selectedClass === undefined)
       return { signedIn: [], notSignedIn: [], notInClass: signins.data };
 
-    console.log("here");
     const idToName = new Map(
       selectedClass.students.map((student) => [student.studentID, student.name])
     );
@@ -92,7 +75,7 @@ export const Home = () => {
     console.log("here2");
 
     return { signedIn, notSignedIn, notInClass };
-  }, [signins.data?.length, selectedClass, scannerName]);
+  }, [signins.data, selectedClass, scannerName]);
 
   useEffect(() => {
     const int = setInterval(() => setNow(new Date()), 1000);
@@ -107,106 +90,14 @@ export const Home = () => {
     <>
       <div className="flex flex-row gap-x-4 justify-between mx-4">
         <DateTimePicker date={start} setDate={setStart} />
-        <Select
-          onValueChange={(name) => {
-            setSelectedClass(
-              classes.data.find((class_) => class_.classID === name)
-            );
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue>
-              {selectedClass ? selectedClass.name : "Select a class"}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Classes:</SelectLabel>
-              {classes.data.map((class_) => (
-                <SelectItem key={class_.classID} value={class_.classID}>
-                  {class_.name}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-
-        <Select
-          onValueChange={(name) => {
-            setScannerName(name);
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue>
-              {scannerName ? scannerName : "Select a scanner"}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Scanners:</SelectLabel>
-              {scanners.data.map((scanner) => (
-                <SelectItem key={scanner} value={scanner}>
-                  {scanner}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-
+        <ClassSelect classes={classes.data} />
+        <ScannerSelect scanners={scanners.data} />
         <DateTimePicker date={end} setDate={setEnd} />
       </div>
       <div className="flex flex-row gap-x-4 mx-4">
-        <Table>
-          <TableHeader>
-            <TableHead>name</TableHead>
-            <TableHead>date</TableHead>
-            <TableHead>studentid</TableHead>
-          </TableHeader>
-          <TableBody>
-            {signedIn.map((signin) => (
-              <TableRow key={signin.id}>
-                <TableCell>{signin.name}</TableCell>
-                <TableCell>
-                  {formatDistanceStrict(signin.time, now, { addSuffix: true })}
-                </TableCell>
-                <TableCell>{signin.studentID}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-
-        <Table>
-          <TableHeader>
-            <TableHead>name</TableHead>
-            <TableHead>studentid</TableHead>
-          </TableHeader>
-          <TableBody>
-            {notSignedIn.map((student) => (
-              // key on studentID should be fine bc notSignedIn should have unique student IDs, while signedIn doesn't
-              <TableRow key={student.studentID}>
-                <TableCell>{student.name}</TableCell>
-                <TableCell>{student.studentID}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-
-        <Table>
-          <TableHeader>
-            <TableHead>date</TableHead>
-            <TableHead>studentid</TableHead>
-          </TableHeader>
-          <TableBody>
-            {notInClass.map((signin) => (
-              <TableRow key={signin.id}>
-                <TableCell>
-                  {formatDistanceStrict(signin.time, now, { addSuffix: true })}
-                </TableCell>
-                <TableCell>{signin.studentID}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <SignedIn {...{ now, signedIn }} />
+        <NotSignedIn {...{ notSignedIn }} />
+        <NotInClass {...{ now, notInClass }} />
       </div>
     </>
   );
