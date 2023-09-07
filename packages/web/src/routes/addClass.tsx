@@ -23,8 +23,10 @@ import { Button } from "@/components/ui/button";
 import { Loader2, MinusCircle, PlusCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { FC } from "react";
 
-export const AddClass = () => {
+export const AddClass: FC<{ onSuccess?: () => void }> = ({ onSuccess }) => {
   const toast = useToast();
   const formSchema = z.object({
     students: z
@@ -54,13 +56,18 @@ export const AddClass = () => {
   });
 
   const students = useFieldArray({ control: form.control, name: "students" });
+  const utils = trpc.useContext();
 
   const mut = trpc.class.create.useMutation({
-    onSuccess: (_data, { name }) => {
+    onSuccess: (_data, { name, period, semester, students }) => {
       toast.toast({
         title: `Class created successfully!`,
         description: `Class ${name} was created successfully!`,
       });
+      // this syntax is so ugly god damn
+      onSuccess?.();
+      utils.class.getAll.invalidate();
+
       form.reset();
     },
     onError: (err) => {
@@ -87,7 +94,10 @@ export const AddClass = () => {
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="px-4 space-y-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="px-4 space-y-4 min-w-3/4"
+        >
           <FormField
             control={form.control}
             name="semester"
@@ -124,9 +134,7 @@ export const AddClass = () => {
                 <FormControl>
                   <Input placeholder="Honors Engineering" {...field} />
                 </FormControl>
-                <FormDescription>
-                  Name of the class WITHOUT the period/semester/year
-                </FormDescription>
+                <FormDescription>Name of the class</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -148,93 +156,85 @@ export const AddClass = () => {
             )}
           />
 
-          {students.fields.map((field, index) => {
-            return (
-              <div
-                key={field.id}
-                className="flex flex-row gap-x-4 justify-between items-end"
-              >
-                <FormField
-                  control={form.control}
-                  name={`students.${index}.name`}
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>Student's Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Johnny Bronco" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`students.${index}.studentID`}
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>Student ID</FormLabel>
-                      <FormControl>
-                        <Input placeholder="24534" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`students.${index}.email`}
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>Student Email (optional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="jbronco24@brophybroncos.org"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => {
-                    students.remove(index);
-                  }}
-                  size="icon"
-                  className="rounded-full group"
-                  disabled={students.fields.length === 1}
-                >
-                  <MinusCircle className="w-4 h-4 dark:group-hover:stroke-red-400 group-hover:stroke-red-600" />
-                </Button>
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => {
-                    students.insert(index + 1, {
-                      name: "",
-                      studentID: "" as any,
-                    });
-                  }}
-                  size="icon"
-                  className="rounded-full group"
-                >
-                  <PlusCircle className="w-4 h-4 dark:group-hover:stroke-green-400 group-hover:stroke-green-600" />
-                </Button>
-              </div>
-            );
-          })}
+          <h3 className="font-medium text-md">Students:</h3>
+          <ScrollArea className="w-full h-40 rounded-md border">
+            <div className="flex flex-col gap-y-4 p-4">
+              {students.fields.map((field, index) => {
+                return (
+                  <div
+                    key={field.id}
+                    className="flex flex-row gap-x-4 justify-between items-end"
+                  >
+                    <FormField
+                      control={form.control}
+                      name={`students.${index}.name`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormLabel>Student's Full Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Johnny Bronco" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`students.${index}.studentID`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormLabel>Student ID</FormLabel>
+                          <FormControl>
+                            <Input placeholder="24534" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={() => {
+                        students.remove(index);
+                      }}
+                      size="icon"
+                      className="rounded-full group"
+                      disabled={students.fields.length === 1}
+                    >
+                      <MinusCircle className="w-4 h-4 dark:group-hover:stroke-red-400 group-hover:stroke-red-600" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={() => {
+                        students.insert(index + 1, {
+                          name: "",
+                          studentID: "" as any,
+                        });
+                      }}
+                      size="icon"
+                      className="rounded-full group"
+                    >
+                      <PlusCircle className="w-4 h-4 dark:group-hover:stroke-green-400 group-hover:stroke-green-600" />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </ScrollArea>
 
-          <Button type="submit" disabled={mut.isLoading}>
-            {mut.isLoading ? (
-              <>
-                <Loader2 className="mr-2 w-4 h-4 animate-spin" /> submitting...
-              </>
-            ) : (
-              "Submit"
-            )}
-          </Button>
+          <div className="flex flex-row justify-center">
+            <Button size="lg" type="submit" disabled={mut.isLoading}>
+              {mut.isLoading ? (
+                <>
+                  <Loader2 className="mr-2 w-4 h-4 animate-spin" />{" "}
+                  submitting...
+                </>
+              ) : (
+                "Submit"
+              )}
+            </Button>
+          </div>
         </form>
       </Form>
     </>

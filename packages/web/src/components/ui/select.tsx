@@ -1,8 +1,9 @@
 import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, MinusCircle, MinusIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { Button } from "./button";
 
 const Select = SelectPrimitive.Root;
 
@@ -74,24 +75,30 @@ SelectLabel.displayName = SelectPrimitive.Label.displayName;
 
 const SelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
->(({ className, children, ...props }, ref) => (
-  <SelectPrimitive.Item
-    ref={ref}
-    className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-      className
-    )}
-    {...props}
-  >
-    <span className="flex absolute left-2 justify-center items-center w-3.5 h-3.5">
-      <SelectPrimitive.ItemIndicator>
-        <Check className="w-4 h-4" />
-      </SelectPrimitive.ItemIndicator>
-    </span>
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item> & {
+    after?: React.ReactNode;
+  }
+>(({ className, children, after, ...props }, ref) => (
+  <div className="flex justify-between items-center pr-2">
+    <SelectPrimitive.Item
+      ref={ref}
+      className={cn(
+        "relative flex h-full w-full cursor-default justify-between select-none items-center rounded-sm py-1.5 pl-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        className
+      )}
+      {...props}
+    >
+      <span className="flex absolute left-2 justify-center items-center w-3.5 h-3.5">
+        <SelectPrimitive.ItemIndicator>
+          <Check className="w-4 h-4" />
+        </SelectPrimitive.ItemIndicator>
+      </span>
 
-    <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
-  </SelectPrimitive.Item>
+      <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+    </SelectPrimitive.Item>
+
+    {after}
+  </div>
 ));
 SelectItem.displayName = SelectPrimitive.Item.displayName;
 

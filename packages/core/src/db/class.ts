@@ -71,4 +71,18 @@ export async function removeStudent({
 
   return class_.data;
 }
+
+export async function deleteClass({
+  classID,
+  userID,
+}: {
+  classID: string;
+  userID: string;
+}) {
+  // should also check that the user owns the class bc pk(userID)
+  const class_ = await ClassEntity.delete({ classID, userID }).go();
+
+  return class_.data;
+}
+
 export * as Class from "./class";

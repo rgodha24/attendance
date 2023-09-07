@@ -71,4 +71,12 @@ export const classRouter = router({
     }),
 
   getAll: privateProcedure.query(async ({ ctx }) => Class.byUserID(ctx.userID)),
+
+  delete: privateProcedure
+    .input(z.object({ classID: z.string() }))
+    .mutation(async ({ ctx: { userID }, input: { classID } }) => {
+      const res = await Class.deleteClass({ classID, userID });
+
+      return res;
+    }),
 });
