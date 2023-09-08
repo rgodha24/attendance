@@ -58,7 +58,6 @@ export const ClassSelect: FC<{ classes: Class[] }> = ({ classes }) => {
           onValueChange={(name) => {
             setSelectedClass(classes.find((class_) => class_.classID === name));
           }}
-          defaultOpen={true}
         >
           <SelectTrigger>
             <SelectValue>

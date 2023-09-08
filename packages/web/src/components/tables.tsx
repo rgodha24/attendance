@@ -15,8 +15,8 @@ export const NotSignedIn: FC<{
 }> = ({ notSignedIn }) => (
   <Table>
     <TableHeader>
-      <TableHead>name</TableHead>
-      <TableHead>studentid</TableHead>
+      <TableHead>Sortable Name</TableHead>
+      <TableHead>Student ID</TableHead>
     </TableHeader>
     <TableBody>
       {notSignedIn.map((student) => (
@@ -36,9 +36,9 @@ export const SignedIn: FC<{
 }> = ({ signedIn, now }) => (
   <Table>
     <TableHeader>
-      <TableHead>name</TableHead>
-      <TableHead>date</TableHead>
-      <TableHead>studentid</TableHead>
+      <TableHead>Sortable Name</TableHead>
+      <TableHead>Date</TableHead>
+      <TableHead>Student ID</TableHead>
     </TableHeader>
     <TableBody>
       {signedIn.map((signin) => (
@@ -60,8 +60,8 @@ export const NotInClass: FC<{
 }> = ({ now, notInClass }) => (
   <Table>
     <TableHeader>
-      <TableHead>date</TableHead>
-      <TableHead>studentid</TableHead>
+      <TableHead>Date</TableHead>
+      <TableHead>Student ID</TableHead>
     </TableHeader>
     <TableBody>
       {notInClass.map((signin) => (
