@@ -30,5 +30,5 @@ export async function get(
     )
     .go();
 
-  return res.data;
+  return res.data.map(({ time, ...s }) => ({ ...s, time: new Date(time) }));
 }

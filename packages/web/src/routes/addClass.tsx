@@ -317,15 +317,13 @@ function Csv({
               <InfoIcon className="w-4 h-4" />
             </TooltipTrigger>
             <TooltipContent>
-              <p>
-                upload a csv WITHOUT headers/column names in the order name
-                studentid
-              </p>
+              <p>upload a csv WITHOUT headers/column</p>
+              <p>names in the order name studentid</p>
               <a
                 className="underline"
                 href="https://docs.google.com/spreadsheets/d/1G3Ll24COqEmCDwv50PUlVPGX-Sw8jWSY/edit?usp=sharing&ouid=111013522637726610301&rtpof=true&sd=true"
               >
-                look at this example :)
+                or look at this example :)
               </a>
             </TooltipContent>
           </Tooltip>

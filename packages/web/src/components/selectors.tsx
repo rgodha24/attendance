@@ -1,4 +1,4 @@
-import { Class, scannerNameAtom, selectedClassAtom } from "@/routes/home";
+import { Class } from "@/routes/home";
 import { useAtom } from "jotai";
 import { FC, useState } from "react";
 import {
@@ -12,11 +12,12 @@ import {
 } from "./ui/select";
 import { AddClass } from "@/routes/addClass";
 import { Button } from "./ui/button";
-import { DeleteIcon, Loader2, MinusCircle, PlusCircle } from "lucide-react";
+import { Loader2, MinusCircle, PlusCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { DialogOverlay } from "@radix-ui/react-dialog";
 import { trpc } from "@/lib/trpc";
 import { toast } from "./ui/use-toast";
+import { scannerNameAtom, selectedClassAtom } from "@/lib/atoms";
 
 export const ScannerSelect: FC<{ scanners: string[] }> = ({ scanners }) => {
   const [scannerName, setScannerName] = useAtom(scannerNameAtom);

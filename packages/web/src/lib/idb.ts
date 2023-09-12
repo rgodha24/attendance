@@ -1,6 +1,6 @@
 import { toast } from "@/components/ui/use-toast";
-import { scannerNameAtom, selectedClassAtom } from "@/routes/home";
 import { createStore } from "jotai";
+import { scannerNameAtom, selectedClassAtom } from "./atoms";
 
 export type SignIn = {
   scannerName: string;
@@ -92,17 +92,20 @@ export async function getAllScannerNames() {
   });
 }
 
-export async function addSignIn({
-  scannerName,
-  time,
-  id,
-  studentID,
-}: {
-  scannerName: string;
-  time: Date;
-  id: string;
-  studentID: number;
-}) {
+export async function addSignIn(
+  {
+    scannerName,
+    time,
+    id,
+    studentID,
+  }: {
+    scannerName: string;
+    time: Date;
+    id: string;
+    studentID: number;
+  },
+  invalidate = false
+) {
   return new Promise<void>(async (resolve, reject) => {
     const db = await getDB();
     const transaction = db.transaction(["signins"], "readwrite");
@@ -111,7 +114,8 @@ export async function addSignIn({
     const request = store.add({ scannerName, time, id, studentID });
 
     transaction.oncomplete = () => {
-      window.dispatchEvent(new CustomEvent("signin"));
+      if (invalidate) window.dispatchEvent(new CustomEvent("signin"));
+
       const store = createStore();
       const currentClass = store.get(selectedClassAtom);
       const currentScanner = store.get(scannerNameAtom);

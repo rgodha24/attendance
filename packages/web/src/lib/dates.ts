@@ -37,9 +37,13 @@ export const datesStore = create<Values & Functions>((set) => ({
       else date = _date;
 
       if (date.getTime() <= start.getTime()) {
-        console.log("end < start");
-        return { end: setMinutes(date, start.getMinutes() + 1) };
-      } else return { end: date };
+        toast({
+          variant: "destructive",
+          title: "End time must be after start time",
+        });
+      }
+
+      return { end: date };
     });
   },
 }));
