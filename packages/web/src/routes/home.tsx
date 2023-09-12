@@ -112,7 +112,7 @@ export const Home = () => {
         />
       </div>
       {/* TODO: grid to make it more responsive?? */}
-      <div className="flex flex-row gap-x-4 mx-4">
+      <div className="grid grid-cols-1 gap-x-4 mx-4 md:grid-cols-2 xl:grid-cols-3">
         <SignedIn {...{ now, signedIn }} />
         <NotSignedIn {...{ notSignedIn }} />
         <NotInClass {...{ now, notInClass }} />
