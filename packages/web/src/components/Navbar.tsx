@@ -22,6 +22,7 @@ export const Navbar = () => {
             onClick={() => {
               setTheme(theme === "dark" ? "light" : "dark");
             }}
+            id="themeSwitcher"
           >
             {theme === "dark" ? <Sun /> : <Moon />}
           </Button>

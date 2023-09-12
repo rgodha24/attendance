@@ -39,17 +39,54 @@ export function ThemeProvider({
   useEffect(() => {
     const root = window.document.documentElement;
 
-    if (!document.startViewTransition) {
+    const switcher = document.getElementById("themeSwitcher");
+
+    // @ts-expect-error view transitions
+    if (!document.startViewTransition || !switcher) {
       root.classList.remove("light", "dark");
       root.classList.add(theme);
       return;
     }
 
-    document.startViewTransition(() => {
+    // @ts-expect-error view transitions
+    const transition = document.startViewTransition(() => {
       root.classList.remove("light", "dark");
       root.classList.add(theme);
     });
-  }, [theme]);
+
+    const rect = switcher.getBoundingClientRect();
+    const x = rect.x + rect.width / 2;
+    const y = rect.y + rect.height / 2;
+
+    const endRadius = Math.hypot(
+      Math.max(x, innerWidth - x),
+      Math.max(y, innerHeight - y)
+    );
+
+    /**
+     * Credit to [@hooray](https://github.com/hooray)
+     * @see https://github.com/vuejs/vitepress/pull/2347
+     */
+    transition.ready.then(() => {
+      const clipPath = [
+        `circle(0px at ${x}px ${y}px)`,
+        `circle(${endRadius}px at ${x}px ${y}px)`,
+      ];
+      root.animate(
+        {
+          clipPath: theme === "dark" ? [...clipPath].reverse() : clipPath,
+        },
+        {
+          duration: 400,
+          easing: "ease-in",
+          pseudoElement:
+            theme === "dark"
+              ? "::view-transition-old(root)"
+              : "::view-transition-new(root)",
+        }
+      );
+    }, [theme]);
+  });
 
   const value = {
     theme,
@@ -58,7 +95,6 @@ export function ThemeProvider({
       setTheme(theme);
     },
   };
-
   return (
     <ThemeProviderContext.Provider {...props} value={value}>
       {children}
