@@ -1,5 +1,4 @@
 name: Upload Binarie
-name: Upload Binaries
 
 permissions:
   contents: write
@@ -7,6 +6,7 @@ permissions:
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
@@ -32,4 +32,3 @@ jobs:
           file: scanner_code/target/arm-unknown-linux-gnueabihf/release/scanner_code
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}
-
