@@ -1,11 +1,11 @@
-name: Upload Binarie
+name: Build Release Binary
 
 permissions:
   contents: write
 
 on:
   release:
-    types: [published]
+    types: [created, published]
 
 env:
   CARGO_TERM_COLOR: always
@@ -17,17 +17,26 @@ jobs:
       run:
         working-directory: ./scanner_code
 
+    strategy:
+      matrix:
+        target:
+          [
+            "arm-unknown-linux-gnueabihf",
+            "x86_64-apple-darwin",
+            "aarch64-apple-darwin",
+          ]
+
     steps:
       - uses: actions/checkout@v3
       - name: Set Targets
-        run: rustup target add arm-unknown-linux-gnueabihf
+        run: rustup target add ${{ matrix.target }}
       - name: install deps
         run: sudo apt update && sudo apt-get install libssl-dev gcc-arm-linux-gnueabihf
       - name: Build
-        run: cargo build --release --target arm-unknown-linux-gnueabihf
+        run: cargo build --release --target ${{ matrix.target }}
       - uses: svenstaro/upload-release-action@v2
         with:
-          asset_name: pi-binary
+          asset_name: ${{ matrix.target }}
           file: scanner_code/target/arm-unknown-linux-gnueabihf/release/scanner_code
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}
