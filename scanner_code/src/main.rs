@@ -1,6 +1,5 @@
 use std::{
-    sync::{Arc, Mutex, OnceLock},
-    thread,
+    sync::{Mutex, OnceLock},
 };
 
 use tokio::sync::mpsc::channel;
