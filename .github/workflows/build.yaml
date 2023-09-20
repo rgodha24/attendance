@@ -5,40 +5,57 @@ permissions:
 
 on:
   release:
-    types: [created, published]
+    types: [published]
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  build-pi:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./scanner_code
 
-    strategy:
-      matrix:
-        include:
-          - target: "arm-unknown-linux-gnueabihf"
-            name: "raspberry-pi"
-          - target: "x86_64-apple-darwin"
-            name: "mac-apple-silicon"
-          - target: "aarch64-apple-darwin"
-            name: "mac-intel"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set Targets
+        run: rustup target add arm-unknown-linux-gnueabihf
+      - name: install deps
+        run: sudo apt update && sudo apt-get install libssl-dev gcc-arm-linux-gnueabihf
+      - name: Build
+        run: cargo build --release --target arm-unknown-linux-gnueabihf
+      - uses: svenstaro/upload-release-action@v2
+        with:
+          asset_name: pi-binary
+          file: scanner_code/target/arm-unknown-linux-gnueabihf/release/scanner_code
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
+
+  build-mac:
+    runs-on: macos-latest
+
+    defaults:
+      run:
+        working-directory: ./scanner_code
 
     steps:
       - uses: actions/checkout@v3
+      - name: Set Targets
+        run: rustup target add x86_64-apple-darwin aarch64-apple-darwin
 
-      - name: install cross
-        run: cargo install cross --git "https://github.com/cross-rs/cross"
+      - name: build arm
+        run: cargo build --release --target aarch64-apple-darwin
 
-      - name: build
-        run: cross build --release --target ${{ matrix.target }}
+      - name: build intel
+        run: cargo build --release --target x86_64-apple-darwin
+
+      - name: create universal binary
+        run: lipo -create -output universal target/x86_64-apple-darwin/release/scanner_code target/aarch64-apple-darwin/release/scanner_code
 
       - uses: svenstaro/upload-release-action@v2
         with:
-          asset_name: ${{ matrix.name }}
-          file: "scanner_code/target/${{ matrix.target }}/release/scanner_code"
+          asset_name: mac-binary
+          file: scanner_code/universal
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}
