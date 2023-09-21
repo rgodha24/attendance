@@ -10,7 +10,7 @@ import { useSignins } from "@/lib/useSignins";
 import { useWsConnection } from "@/lib/ws";
 import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
-import { RefreshCwIcon } from "lucide-react";
+import { ClockIcon, RefreshCwIcon } from "lucide-react";
 import { FC, useEffect, useMemo, useState } from "react";
 import { useStore } from "zustand";
 import { selectedClassAtom, scannerNameAtom } from "@/lib/atoms";
@@ -20,7 +20,8 @@ import {
   Tooltip,
   TooltipContent,
 } from "@/components/ui/tooltip";
-import { formatDistanceStrict } from "date-fns";
+import { formatDistanceStrict, setHours, setMinutes } from "date-fns";
+import { toast } from "@/components/ui/use-toast";
 
 export type Class = {
   name: string;
@@ -100,6 +101,7 @@ export const Home = () => {
   return (
     <>
       <div className="flex flex-row gap-x-4 justify-between mx-4">
+        <ResetTimeButton />
         <DateTimePicker date={start} setDate={setStart} />
         <ClassSelect classes={classes.data} />
         <ScannerSelect scanners={scanners.data} />
@@ -118,6 +120,43 @@ export const Home = () => {
         <NotInClass {...{ now, notInClass }} />
       </div>
     </>
+  );
+};
+
+const ResetTimeButton: FC<{}> = () => {
+  const { setTimes } = useStore(datesStore, ({ setTimes }) => ({ setTimes }));
+
+  return (
+    <div className="min-w-4">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger>
+            <Button
+              variant="outline"
+              className="flex-1 rounded-full group"
+              size="icon"
+              onClick={() => {
+                setTimes(
+                  setMinutes(new Date(), new Date().getMinutes() - 10),
+                  setHours(new Date(), new Date().getHours() + 1)
+                );
+                toast({
+                  title: "reset time successfully",
+                });
+              }}
+            >
+              <ClockIcon className="h-4 min-w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>
+              reset time to starting at 10 minutes go and ending at 1 hour in
+              the future
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
   );
 };
 

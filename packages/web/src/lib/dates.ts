@@ -10,6 +10,7 @@ type Values = {
 type Functions = {
   setStart: (date: Date | ((d: Date) => Date)) => void;
   setEnd: (date: Date | ((d: Date) => Date)) => void;
+  setTimes: (start: Date, end: Date) => void;
 };
 
 export const datesStore = create<Values & Functions>((set) => ({
@@ -45,5 +46,8 @@ export const datesStore = create<Values & Functions>((set) => ({
 
       return { end: date };
     });
+  },
+  setTimes: (start, end) => {
+    set({ start, end });
   },
 }));
