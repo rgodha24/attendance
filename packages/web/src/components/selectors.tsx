@@ -39,7 +39,27 @@ export const ScannerSelect: FC<{ scanners: string[] }> = ({ scanners }) => {
       >
         <SelectTrigger>
           <SelectValue>
-            {scannerName ? scannerName : "Select a scanner"}
+            {scannerName ? (
+              <>
+                {scannerName}{" "}
+                {
+                  <Badge
+                    variant={
+                      connectedScanners.data.includes(scannerName)
+                        ? "default"
+                        : "secondary"
+                    }
+                    className="ml-2"
+                  >
+                    {connectedScanners.data.includes(scannerName)
+                      ? "connected"
+                      : "disconnected"}
+                  </Badge>
+                }{" "}
+              </>
+            ) : (
+              "Select a scanner"
+            )}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
