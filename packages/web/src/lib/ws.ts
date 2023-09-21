@@ -8,8 +8,6 @@ export function useWsConnection() {
     const token = JSON.parse(localStorage.getItem("token") || '""') as string;
     if (token?.length === 0) window.location.pathname = "/login";
 
-    console.log("here!!");
-
     const ws = new WebSocket(import.meta.env.VITE_WS_URL);
     ws.onopen = () => ws.send(JSON.stringify({ action: "auth", data: token }));
 

@@ -41,8 +41,10 @@ export const auth = WebSocketApiHandler(async (event) => {
   }
 
   const { data: con } = await UnauthedConnectionEntity.query
-    .connections({ connectionID })
+    .id({ connectionID })
     .go();
+
+  console.log("con", con);
 
   await Promise.all(con.map((c) => UnauthedConnectionEntity.delete(c).go()));
 
@@ -53,7 +55,7 @@ export const auth = WebSocketApiHandler(async (event) => {
 
   if (jwt.type !== "user") return deleteConnection(connectionID);
 
-  await ConnectionEntity.create({
+  ConnectionEntity.create({
     connectionID,
     userID: jwt.properties.userID,
   }).go();

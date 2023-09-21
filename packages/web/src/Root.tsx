@@ -41,6 +41,7 @@ export function Root() {
     window.addEventListener("scannerChange", () => {
       console.log("invalidating queries");
       queryClient.invalidateQueries(["scanners"]);
+      queryClient.invalidateQueries([["scanner", "connected"]]);
     });
   }, [queryClient]);
 

@@ -1,7 +1,7 @@
 import { Table } from "sst/node/table";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
-export const client = new DynamoDBClient();
+export const client = new DynamoDBClient({});
 const tableName = Table.electrodb.tableName;
 
 import { Entity } from "electrodb";
@@ -22,17 +22,22 @@ export const UserEntity = new Entity(
         type: "string",
         required: true,
       },
+      connectedScanners: {
+        type: "set",
+        items: "string",
+        required: true,
+      },
     },
     indexes: {
       byId: {
         collection: "attendance",
         pk: {
           field: "pk",
-          composite: [],
+          composite: ["userID"],
         },
         sk: {
           field: "sk",
-          composite: ["userID"],
+          composite: [],
         },
       },
     },
@@ -237,14 +242,14 @@ export const UnauthedConnectionEntity = new Entity(
       },
     },
     indexes: {
-      connections: {
+      date: {
         pk: {
           field: "pk",
-          composite: ["connectionID"],
+          composite: ["connectionDate"],
         },
         sk: {
           field: "sk",
-          composite: ["connectionDate"],
+          composite: [],
         },
       },
       id: {

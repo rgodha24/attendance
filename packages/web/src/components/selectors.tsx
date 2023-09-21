@@ -18,31 +18,84 @@ import { DialogOverlay } from "@radix-ui/react-dialog";
 import { trpc } from "@/lib/trpc";
 import { toast } from "./ui/use-toast";
 import { scannerNameAtom, selectedClassAtom } from "@/lib/atoms";
+import { uidAtom } from "@/token";
+import { redirect } from "@tanstack/react-router";
+import { Badge } from "./ui/badge";
 
 export const ScannerSelect: FC<{ scanners: string[] }> = ({ scanners }) => {
   const [scannerName, setScannerName] = useAtom(scannerNameAtom);
+  const [uid] = useAtom(uidAtom);
+  const connectedScanners = trpc.scanner.connected.useQuery(undefined, {
+    initialData: [],
+  });
+
+  if (!uid) redirect({ to: "/login", replace: true });
   return (
-    <Select
-      onValueChange={(name) => {
-        setScannerName(name);
-      }}
-    >
-      <SelectTrigger>
-        <SelectValue>
-          {scannerName ? scannerName : "Select a scanner"}
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        <SelectGroup>
-          <SelectLabel>Scanners:</SelectLabel>
-          {scanners.map((scanner) => (
-            <SelectItem key={scanner} value={scanner}>
-              {scanner}
-            </SelectItem>
-          ))}
-        </SelectGroup>
-      </SelectContent>
-    </Select>
+    <Dialog>
+      <Select
+        onValueChange={(name) => {
+          setScannerName(name);
+        }}
+      >
+        <SelectTrigger>
+          <SelectValue>
+            {scannerName ? scannerName : "Select a scanner"}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectLabel className="flex flex-row justify-between items-center">
+              <h3 className="font-medium text-md">Scanners: </h3>
+              <DialogTrigger>
+                <Button
+                  variant="outline"
+                  type="button"
+                  size="icon"
+                  className="rounded-full group"
+                >
+                  <PlusCircle className="w-4 h-4 dark:group-hover:stroke-green-400 group-hover:stroke-green-600" />
+                </Button>
+              </DialogTrigger>
+            </SelectLabel>
+            {scanners.map((scanner) => {
+              const isConnected = connectedScanners.data.includes(scanner);
+              return (
+                <SelectItem key={scanner} value={scanner} className="">
+                  {scanner}
+                  <Badge
+                    variant={isConnected ? "default" : "secondary"}
+                    className="ml-2"
+                  >
+                    {isConnected ? "connected" : "disconnected"}
+                  </Badge>
+                </SelectItem>
+              );
+            })}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+      <DialogOverlay>
+        <DialogContent className="flex flex-row justify-center">
+          <div className="flex flex-col aspect-square max-w-40% p-8">
+            <img
+              src={
+                "https://api.qrserver.com/v1/create-qr-code?" +
+                new URLSearchParams({
+                  data: "https://barcodeapi.org/api/codabar/" + uid,
+                  size: "300x300",
+                }).toString()
+              }
+              alt="qrcode"
+            />
+            <p className="text-center">
+              scan this qrcode on your phone, then scan the barcode it generates
+              on the scanner to connect to it
+              {import.meta.env.DEV && "\n" + uid}
+            </p>
+          </div>
+        </DialogContent>
+      </DialogOverlay>
+    </Dialog>
   );
 };
 
