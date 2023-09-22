@@ -5,8 +5,8 @@ import { User } from "@attendance/core/db/user";
 
 export const handler = ApiHandler(async (req) => {
   const schema = z.object({
-    oldUID: z.string().min(20).optional(),
-    newUID: z.string().min(20).optional(),
+    oldUID: z.coerce.number().optional(),
+    newUID: z.coerce.number().optional(),
     scannerName: z.string().min(2),
   });
 
@@ -30,7 +30,7 @@ export const handler = ApiHandler(async (req) => {
       );
 
       promises.push(
-        User.removeScanner(oldUID, scannerName).catch((err) =>
+        User.removeScanner({ scannerName, userID: oldUID }).catch((err) =>
           console.error(
             "unable to remove scanner",
             scannerName,
@@ -53,7 +53,7 @@ export const handler = ApiHandler(async (req) => {
       );
 
       promises.push(
-        User.addScanner(newUID, scannerName).catch((err) =>
+        User.addScanner({ scannerName, userID: newUID }).catch((err) =>
           console.error(
             "unable to add scanner",
             scannerName,
@@ -66,7 +66,9 @@ export const handler = ApiHandler(async (req) => {
     }
   }
 
-  await Promise.all(promises);
+  const p = await Promise.all(promises);
+
+  console.log(p.length);
 
   return { statusCode: 200, body: "OK" };
 });

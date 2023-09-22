@@ -7,7 +7,10 @@ export const handler = ApiHandler(async (req) => {
   const schema = z.object({
     studentID: z.coerce.number().min(10_000).max(99_999),
     scannerName: z.coerce.string(),
-    userID: z.string().min(6),
+    userID: z.coerce
+      .number()
+      .min(1 * 10 ** 14)
+      .max(1 * 10 ** 15),
   });
 
   const data = schema.safeParse(req.queryStringParameters);

@@ -29,7 +29,7 @@ export const ScannerSelect: FC<{ scanners: string[] }> = ({ scanners }) => {
     initialData: [],
   });
 
-  if (!uid) redirect({ to: "/login", replace: true });
+  if (!uid) return redirect({ to: "/login", replace: true });
   return (
     <Dialog>
       <Select
@@ -101,17 +101,17 @@ export const ScannerSelect: FC<{ scanners: string[] }> = ({ scanners }) => {
               src={
                 "https://api.qrserver.com/v1/create-qr-code?" +
                 new URLSearchParams({
-                  data: "https://barcodeapi.org/api/codabar/" + uid,
+                  data: "https://barcodeapi.org/api/128/" + uid.toString(36),
                   size: "300x300",
-                }).toString()
+                })
               }
               alt="qrcode"
             />
             <p className="text-center">
               scan this qrcode on your phone, then scan the barcode it generates
               on the scanner to connect to it
-              {import.meta.env.DEV && "\n" + uid}
             </p>
+            {import.meta.env.DEV && <p>{uid.toString(36)}</p>}
           </div>
         </DialogContent>
       </DialogOverlay>

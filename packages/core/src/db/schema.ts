@@ -14,8 +14,12 @@ export const UserEntity = new Entity(
       service: "attendance",
     },
     attributes: {
-      userID: {
+      googleID: {
         type: "string",
+        required: true,
+      },
+      userID: {
+        type: "number",
         required: true,
       },
       email: {
@@ -29,8 +33,20 @@ export const UserEntity = new Entity(
       },
     },
     indexes: {
-      byId: {
-        collection: "attendance",
+      byGoogleID: {
+        collection: "google_user",
+        index: "gsi1",
+        pk: {
+          field: "gsi1pk",
+          composite: ["googleID"],
+        },
+        sk: {
+          field: "gsi1sk",
+          composite: [],
+        },
+      },
+      byUserID: {
+        collection: "uid",
         pk: {
           field: "pk",
           composite: ["userID"],
@@ -58,7 +74,7 @@ export const ClassEntity = new Entity(
         required: true,
       },
       userID: {
-        type: "string",
+        type: "number",
         required: true,
       },
       students: {
@@ -135,7 +151,7 @@ export const SignInEntity = new Entity(
     model: { entity: "SignIn", version: "1", service: "attendance" },
     attributes: {
       userID: {
-        type: "string",
+        type: "number",
         required: true,
       },
       studentID: {
@@ -193,7 +209,7 @@ export const ConnectionEntity = new Entity(
         required: true,
       },
       userID: {
-        type: "string",
+        type: "number",
         required: true,
       },
     },

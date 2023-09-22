@@ -23,6 +23,7 @@ export const Navbar = () => {
               setTheme(theme === "dark" ? "light" : "dark");
             }}
             id="themeSwitcher"
+            aria-label="theme switcher"
           >
             {theme === "dark" ? <Sun /> : <Moon />}
           </Button>

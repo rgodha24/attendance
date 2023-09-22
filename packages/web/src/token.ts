@@ -15,7 +15,7 @@ export const uidAtom = atom((get) => {
       properties: { userID },
     } = JSON.parse(atob(payload));
 
-    return (userID as string) || null;
+    return (userID as number) || null;
   } catch (e) {
     return null;
   }

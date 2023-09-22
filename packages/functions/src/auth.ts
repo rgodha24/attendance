@@ -1,6 +1,7 @@
 import { AuthHandler, GoogleAdapter, Session } from "sst/node/auth";
 import { Config } from "sst/node/config";
 import { User } from "@attendance/core/db/user";
+import { createUID } from "@attendance/core/uid";
 
 export const handler = AuthHandler({
   providers: {
@@ -14,10 +15,15 @@ export const handler = AuthHandler({
 
         console.log("here!!!");
 
-        const user = await User.get({ userID: sub });
+        let user = await User.getGoogleID({ googleID: sub });
         if (!user) {
           console.log("creating user");
-          await User.create({ userID: sub, email, connectedScanners: [""] });
+          user = await User.create({
+            googleID: sub,
+            userID: createUID(),
+            email,
+            connectedScanners: [""],
+          });
         } else {
           console.log("using alr made user w/ email", email, user);
         }
@@ -26,7 +32,8 @@ export const handler = AuthHandler({
           type: "user",
           redirect: Config.frontendURL,
           properties: {
-            userID: claims.sub,
+            userID: user.userID,
+            googleID: user.googleID,
           },
         });
       },
@@ -37,7 +44,8 @@ export const handler = AuthHandler({
 declare module "sst/node/auth" {
   export interface SessionTypes {
     user: {
-      userID: string;
+      userID: number;
+      googleID: string;
     };
   }
 }

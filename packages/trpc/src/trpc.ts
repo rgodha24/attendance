@@ -5,7 +5,8 @@ import superjson from "superjson";
 declare module "sst/node/auth" {
   export interface SessionTypes {
     user: {
-      userID: string;
+      userID: number;
+      googleID: string;
     };
   }
 }
@@ -27,6 +28,7 @@ const ensureAuthedMiddleware = t.middleware(({ ctx, next }) => {
       ...ctx,
       session: ctx.session,
       userID: ctx.session.properties.userID,
+      googleID: ctx.session.properties.googleID,
     },
   });
 });

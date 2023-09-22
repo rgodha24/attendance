@@ -17,7 +17,7 @@ export async function create(args: Omit<SignInInner, "time" | "signInID">) {
 }
 
 export async function get(
-  { userID, scannerName }: { userID: string; scannerName?: string },
+  { userID, scannerName }: { userID: number; scannerName?: string },
   dates?: { start: Date; end?: Date }
 ) {
   const res = await SignInEntity.query

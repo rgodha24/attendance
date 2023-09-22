@@ -6,7 +6,7 @@ import { TRPCError } from "@trpc/server";
 type ClassInner = EntityRecord<typeof ClassEntity>;
 type Student = ClassInner["students"][number];
 
-export async function byUserID(userID: string) {
+export async function byUserID(userID: number) {
   const classes = await ClassEntity.query.classes({ userID }).go();
   return classes.data;
 }
@@ -16,7 +16,7 @@ export async function byID({
   userID,
 }: {
   classID: string;
-  userID: string;
+  userID: number;
 }) {
   const class_ = await ClassEntity.query.classes({ classID, userID }).go();
   return class_.data[0];
@@ -37,7 +37,7 @@ export async function addStudent({
   student,
 }: {
   classID: string;
-  userID: string;
+  userID: number;
   student: Student;
 }) {
   // this should (?) make sure that the user owns the class because it's looking to patch
@@ -55,7 +55,7 @@ export async function removeStudent({
   studentID,
 }: {
   classID: string;
-  userID: string;
+  userID: number;
   studentID: number;
 }) {
   const oldStudents = await byID({ classID, userID });
@@ -77,7 +77,7 @@ export async function deleteClass({
   userID,
 }: {
   classID: string;
-  userID: string;
+  userID: number;
 }) {
   // should also check that the user owns the class bc pk(userID)
   const class_ = await ClassEntity.delete({ classID, userID }).go();

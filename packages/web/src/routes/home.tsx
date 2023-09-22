@@ -144,13 +144,14 @@ const ResetTimeButton: FC<{}> = () => {
                   title: "reset time successfully",
                 });
               }}
+              aria-label="reset time"
             >
               <ClockIcon className="h-4 min-w-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
             <p>
-              reset time to starting at 10 minutes go and ending at 1 hour in
+              reset time to starting at 10 minutes ago and ending at 1 hour in
               the future
             </p>
           </TooltipContent>
@@ -174,6 +175,7 @@ const FetchFromServerButton: FC<{
             variant="outline"
             className="flex-1 rounded-full group"
             size="icon"
+            aria-label="refresh"
             onClick={onClick}
             disabled={isSubmitting}
           >

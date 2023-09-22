@@ -4,7 +4,7 @@ import { Config } from "sst/node/config";
 import superjson from "superjson";
 import { Message } from "./schema";
 
-export async function sendMessage(userID: string, message: Message) {
+export async function sendMessage(userID: number, message: Message) {
   const wsURL = Config.wsURL.replace("wss://", "https://");
   const manager = new ApiGatewayManagementApi({ endpoint: wsURL });
 

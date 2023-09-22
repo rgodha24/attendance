@@ -12,32 +12,50 @@ export async function create(args: UserInner) {
   return res.data;
 }
 
-export async function get({ userID }: { userID: string }) {
-  const res = await UserEntity.get({ userID }).go();
+export async function getUID({ userID }: { userID: number }) {
+  const res = await UserEntity.query.byUserID({ userID }).go();
 
-  return res.data;
+  return res.data.length === 1 ? res.data[0] : null;
 }
 
-export async function addScanner(userID: string, name: string) {
-  console.log("Adding scanner", name, "to uid", userID);
+export async function getGoogleID({ googleID }: { googleID: string }) {
+  const res = await UserEntity.query.byGoogleID({ googleID }).go();
+
+  return res.data.length === 1 ? res.data[0] : null;
+}
+
+export async function addScanner({
+  userID,
+  scannerName,
+}: {
+  userID: number;
+  scannerName: string;
+}) {
+  console.log("Adding scanner", scannerName, "to uid", userID);
   const res = await UserEntity.update({
     userID,
   })
     .add({
-      connectedScanners: [name],
+      connectedScanners: [scannerName],
     })
     .go();
 
   return res.data;
 }
 
-export async function removeScanner(userID: string, scanner: string) {
-  console.log("removing scanner", scanner, "from uid", userID);
+export async function removeScanner({
+  userID,
+  scannerName,
+}: {
+  userID: number;
+  scannerName: string;
+}) {
+  console.log("removing scanner", scannerName, "from uid", userID);
   const res = await UserEntity.update({
     userID,
   })
     .delete({
-      connectedScanners: [scanner],
+      connectedScanners: [scannerName],
     })
     .go();
 

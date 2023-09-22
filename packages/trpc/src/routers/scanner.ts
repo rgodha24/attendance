@@ -4,7 +4,7 @@ import { User } from "@attendance/core/db/user";
 
 export const scannerRouter = router({
   connected: privateProcedure.query(async ({ ctx: { userID } }) => {
-    const user = await User.get({ userID });
+    const user = await User.getUID({ userID });
     if (!user) throw new TRPCError({ code: "UNAUTHORIZED" });
     return user.connectedScanners;
   }),
