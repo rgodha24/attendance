@@ -29,7 +29,7 @@ export const ScannerSelect: FC<{ scanners: string[] }> = ({ scanners }) => {
     initialData: [],
   });
 
-  if (!uid) return redirect({ to: "/login", replace: true });
+  if (!uid) { redirect({ to: "/login", replace: true }); return }
   return (
     <Dialog>
       <Select
