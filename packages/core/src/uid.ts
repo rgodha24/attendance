@@ -1,13 +1,7 @@
-import { customAlphabet } from "nanoid";
+import { randomBytes } from "crypto";
 
-let nanoid = customAlphabet("0123456789", 15);
-
-export function createUID() {
-  let num: number;
-
-  do {
-    num = parseInt(nanoid());
-  } while (num.toString().length !== 15);
-
-  return num;
+export function createUID(): number {
+  let num =
+    parseInt(randomBytes(8).toString("hex"), 16) % 1_000_000_000_000_000;
+  return num.toString().length === 15 ? num : createUID();
 }
