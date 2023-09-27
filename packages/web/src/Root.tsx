@@ -21,7 +21,7 @@ export function Root() {
         httpBatchLink({
           url: `${API}/trpc`,
           headers() {
-            return !!token
+            return token
               ? {
                 Authorization: `Bearer ${JSON.parse(token)}`,
               }
@@ -38,7 +38,7 @@ export function Root() {
       console.log("invalidating queries");
       queryClient.invalidateQueries(["signins"]);
     });
-    window.addEventListener("scannerChange", () => {
+    window.addEventListener("scanner", () => {
       console.log("invalidating queries");
       queryClient.invalidateQueries(["scanners"]);
       queryClient.invalidateQueries([["scanner", "connected"]]);

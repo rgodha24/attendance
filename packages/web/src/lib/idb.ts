@@ -1,5 +1,5 @@
 import { toast } from "@/components/ui/use-toast";
-import { createStore } from "jotai";
+import { createStore, getDefaultStore } from "jotai";
 import { scannerNameAtom, selectedClassAtom } from "./atoms";
 
 export type SignIn = {
@@ -12,13 +12,15 @@ export type SignIn = {
 export function getDB() {
   return new Promise<IDBDatabase>((resolve, reject) => {
     console.log("getting db");
-    const req = indexedDB.open("attendance", 1);
+    const req = indexedDB.open("attendance", 2);
     req.onerror = () => reject(req.error);
     req.onsuccess = () => resolve(req.result);
     req.onupgradeneeded = () => {
       const db = req.result;
       const store = db.createObjectStore("signins", { keyPath: "id" });
       store.createIndex("scannerNameidx", "scannerName");
+      store.createIndex("timeIdx", "time");
+      store.createIndex("scannerTimeIdx", ["scannerName", "time"]);
     };
   });
 }
@@ -37,25 +39,25 @@ export async function getSignIns({
     const db = await getDB();
     const transaction = db.transaction(["signins"], "readonly");
     const store = transaction.objectStore("signins");
-    const scannerIndex = store.index("scannerNameidx");
+    const scannerTimeIndex = store.index("scannerTimeIdx");
 
     const signIns: SignIn[] = [];
 
-    const request = scannerIndex.openCursor(IDBKeyRange.only(scannerName));
+    const range = IDBKeyRange.bound(
+      [scannerName, start.getTime()],
+      [scannerName, end.getTime()]
+    );
+    const request = scannerTimeIndex.openCursor(range);
 
     request.onsuccess = () => {
       const cursor = request.result;
       if (cursor) {
-        signIns.push(cursor.value);
+        const { value } = cursor;
+        value["time"] = new Date(value.time);
+        signIns.push(value);
         cursor.continue();
       } else {
-        resolve(
-          signIns.filter(
-            ({ time }) =>
-              time.getTime() > start.getTime() &&
-              time.getTime() <= end.getTime()
-          )
-        );
+        resolve(signIns);
       }
     };
 
@@ -111,12 +113,17 @@ export async function addSignIn(
     const transaction = db.transaction(["signins"], "readwrite");
     const store = transaction.objectStore("signins");
 
-    const request = store.add({ scannerName, time, id, studentID });
+    const request = store.add({
+      scannerName,
+      time: time.getTime(),
+      id,
+      studentID,
+    });
 
     transaction.oncomplete = () => {
       if (invalidate) window.dispatchEvent(new CustomEvent("signin"));
 
-      const store = createStore();
+      const store = getDefaultStore();
       const currentClass = store.get(selectedClassAtom);
       const currentScanner = store.get(scannerNameAtom);
       const name = currentClass?.students.find(
@@ -125,7 +132,7 @@ export async function addSignIn(
 
       toast({
         title:
-          `${!!name ? name : studentID} signed in` +
+          `${name ? name : studentID} signed in` +
           (currentScanner ? ` on scanner ${currentScanner}` : ""),
       });
 

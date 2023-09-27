@@ -61,7 +61,7 @@ const loginRoute = new Route({
   component: Login,
   beforeLoad: () => {
     const token = localStorage.getItem("token");
-    if (!!token) router.history.push("/");
+    if (token) router.history.push("/");
   },
 });
 

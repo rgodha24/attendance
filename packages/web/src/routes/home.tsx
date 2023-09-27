@@ -10,10 +10,14 @@ import { useSignins } from "@/lib/useSignins";
 import { useWsConnection } from "@/lib/ws";
 import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
-import { ClockIcon, RefreshCwIcon } from "lucide-react";
+import { ClockIcon, MergeIcon, RefreshCwIcon } from "lucide-react";
 import { FC, useEffect, useMemo, useState } from "react";
 import { useStore } from "zustand";
-import { selectedClassAtom, scannerNameAtom } from "@/lib/atoms";
+import {
+  selectedClassAtom,
+  scannerNameAtom,
+  deduplicateAtom,
+} from "@/lib/atoms";
 import {
   TooltipProvider,
   TooltipTrigger,
@@ -22,6 +26,7 @@ import {
 } from "@/components/ui/tooltip";
 import { formatDistanceStrict, setHours, setMinutes } from "date-fns";
 import { toast } from "@/components/ui/use-toast";
+import { Toggle } from "@/components/ui/toggle";
 
 export type Class = {
   name: string;
@@ -37,7 +42,7 @@ export const Home = () => {
   });
   const [selectedClass] = useAtom(selectedClassAtom);
   const [scannerName] = useAtom(scannerNameAtom);
-  let [now, setNow] = useState(new Date());
+  const [now, setNow] = useState(new Date());
 
   useWsConnection();
   const signins = useSignins({
@@ -78,8 +83,6 @@ export const Home = () => {
       ({ studentID }) => !signedInIDS.has(studentID)
     );
 
-    console.log("here2");
-
     return { signedIn, notSignedIn, notInClass };
   }, [signins.data, selectedClass, scannerName]);
 
@@ -112,14 +115,44 @@ export const Home = () => {
           lastUpdated={serverSignIns.dataUpdatedAt}
           now={now}
         />
+        <DeduplicateButton />
       </div>
-      {/* TODO: grid to make it more responsive?? */}
       <div className="grid grid-cols-1 gap-x-4 mx-4 md:grid-cols-2 xl:grid-cols-3">
         <SignedIn {...{ now, signedIn }} />
         <NotSignedIn {...{ notSignedIn }} />
         <NotInClass {...{ now, notInClass }} />
       </div>
     </>
+  );
+};
+
+const DeduplicateButton: FC<{}> = () => {
+  const [deduplicated, setDeduplicated] = useAtom(deduplicateAtom);
+
+  return (
+    <div className="min-w-4">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger tabIndex={-1}>
+            <Toggle
+              variant="outline"
+              className="rounded-full"
+              pressed={deduplicated}
+              onPressedChange={setDeduplicated}
+              aria-label="deduplicate signed in students"
+            >
+              <MergeIcon className="w-4 h-4" />
+            </Toggle>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>
+              Deduplicate the "signed in students" table. Keeps the more recent
+              signin. Currently {deduplicated ? "on" : "off"}
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
   );
 };
 
@@ -130,7 +163,7 @@ const ResetTimeButton: FC<{}> = () => {
     <div className="min-w-4">
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <Button
               variant="outline"
               className="flex-1 rounded-full group"
@@ -170,7 +203,7 @@ const FetchFromServerButton: FC<{
   <div className="justify-start min-w-4">
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger>
+        <TooltipTrigger asChild>
           <Button
             variant="outline"
             className="flex-1 rounded-full group"

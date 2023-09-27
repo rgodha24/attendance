@@ -6,4 +6,9 @@ export const selectedClassAtom = atomWithStorage<Class | undefined>(
   undefined
 );
 
-export const scannerNameAtom = atomWithStorage<string>("scannerName", "test");
+export const scannerNameAtom = atomWithStorage<string | undefined>(
+  "scannerName",
+  undefined
+);
+
+export const deduplicateAtom = atomWithStorage("deduplicate", true);

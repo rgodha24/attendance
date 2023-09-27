@@ -6,12 +6,12 @@ export const useSignins = ({
   start,
   end,
 }: {
-  scannerName: string;
+  scannerName: string | undefined;
   start: Date;
   end: Date;
 }) =>
   useQuery({
     queryKey: ["signins", scannerName, start, end] as const,
     queryFn: async ({ queryKey: [, scannerName, start, end] }) =>
-      getSignIns({ scannerName, start, end }),
+      !!scannerName ? getSignIns({ scannerName, start, end }) : [],
   });

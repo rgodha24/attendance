@@ -6,6 +6,6 @@ export const scannerRouter = router({
   connected: privateProcedure.query(async ({ ctx: { userID } }) => {
     const user = await User.getUID({ userID });
     if (!user) throw new TRPCError({ code: "UNAUTHORIZED" });
-    return user.connectedScanners;
+    return user.connectedScanners || [];
   }),
 });
