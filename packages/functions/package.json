@@ -9,8 +9,8 @@
   "devDependencies": {
     "@types/aws-lambda": "^8.10.119",
     "@types/node": "^20.5.1",
-    "sst": "^2.24.9",
-    "vitest": "^0.34.2"
+    "sst": "^2.26.11",
+    "vitest": "^0.34.6"
   },
   "dependencies": {
     "@attendance/trpc": "workspace:*",
