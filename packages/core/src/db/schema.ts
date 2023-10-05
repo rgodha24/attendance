@@ -283,3 +283,44 @@ export const UnauthedConnectionEntity = new Entity(
   },
   { client, table: tableName }
 );
+
+// export const ScannerEntity = new Entity({
+//   model: { entity: "Scanner", version: "1", service: "attendance" },
+//   attributes: {
+//     scannerName: {
+//       type: "string",
+//       required: true,
+//     },
+//     pairedUserID: {
+//       type: "number",
+//     },
+//     lastConnected: {
+//       type: "number",
+//       required: true,
+//       default: () => Date.now(),
+//     },
+//   },
+//   indexes: {
+//     byName: {
+//       pk: {
+//         field: "pk",
+//         composite: ["scannerName"],
+//       },
+//       sk: {
+//         field: "sk",
+//         composite: ["lastConnected"],
+//       },
+//     },
+//     byUID: {
+//       index: "gsi1",
+//       pk: {
+//         field: "gsi1pk",
+//         composite: ["pairedUserID"],
+//       },
+//       sk: {
+//         field: "gsi1sk",
+//         composite: ["scannerName"],
+//       },
+//     },
+//   },
+// });

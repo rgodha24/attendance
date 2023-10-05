@@ -47,6 +47,7 @@ export function MyStack({ stack }: StackContext) {
       "POST /trpc/{proxy+}": "packages/functions/src/trpc.handler",
       "POST /signin": "packages/functions/src/signin.handler",
       "POST /changeScanner": "packages/functions/src/changeScanner.handler",
+      "POST /scannerPing": "packages/functions/src/scannerPing.handler",
     },
     customDomain:
       stack.stage === "production"
