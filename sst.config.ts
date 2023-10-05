@@ -1,5 +1,9 @@
 import { SSTConfig } from "sst";
-import { MyStack } from "./stacks/MyStack";
+import { ApiStack } from "./stacks/API";
+import { ConfigStack } from "./stacks/Config";
+import { SitesStack } from "./stacks/Sites";
+import { DBStack } from "./stacks/DB";
+import { WSStack } from "./stacks/WS";
 
 export default {
   config(_input) {
@@ -9,6 +13,11 @@ export default {
     };
   },
   stacks(app) {
-    app.stack(MyStack);
-  }
+    app
+      .stack(DBStack)
+      .stack(ApiStack)
+      .stack(WSStack)
+      .stack(SitesStack)
+      .stack(ConfigStack);
+  },
 } satisfies SSTConfig;
