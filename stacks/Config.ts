@@ -6,7 +6,7 @@ import { SitesStack } from "./Sites";
 export function ConfigStack({ stack }: StackContext) {
   const { api } = use(ApiStack);
   const { ws } = use(WSStack);
-  const { site } = use(SitesStack);
+  const { site, stats } = use(SitesStack);
 
   const wsURL = new Config.Parameter(stack, "wsURL", {
     value: ws.customDomainUrl || ws.url,
@@ -27,5 +27,6 @@ export function ConfigStack({ stack }: StackContext) {
     ApiEndpoint: api.customDomainUrl || api.url,
     SiteUrl: site.customDomainUrl || site.url,
     WsUrl: ws.customDomainUrl || ws.url,
+    StatsUrl: stats.customDomainUrl || stats.url,
   });
 }
