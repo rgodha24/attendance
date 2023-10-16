@@ -24,10 +24,10 @@ macro_rules! uid {
 
 macro_rules! exit_handler {
     () => {
-        let (exit_sender, mut exit_receiver) = channel::<bool>(10);
+        let (exit_sender, mut exit_receiver) = channel::<()>(10);
 
         ctrlc::set_handler(move || {
-            exit_sender.blocking_send(true).unwrap();
+            exit_sender.blocking_send(()).unwrap();
         })
         .expect("Error setting Ctrl-C handler");
 

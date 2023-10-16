@@ -45,11 +45,7 @@ export const Home = () => {
   const [now, setNow] = useState(new Date());
 
   useWsConnection();
-  const signins = useSignins({
-    scannerName,
-    start,
-    end,
-  });
+  const signins = useSignins();
 
   const serverSignIns = useGetServerSignins();
 
@@ -59,10 +55,8 @@ export const Home = () => {
   });
 
   const { signedIn, notSignedIn, notInClass } = useMemo(() => {
-    if (signins.data === undefined)
-      return { signedIn: [], notSignedIn: [], notInClass: [] };
-    else if (selectedClass === undefined)
-      return { signedIn: [], notSignedIn: [], notInClass: signins.data };
+    if (selectedClass === undefined)
+      return { signedIn: [], notSignedIn: [], notInClass: signins };
 
     const idToName = new Map(
       selectedClass.students.map((student) => [student.studentID, student.name])
@@ -71,20 +65,20 @@ export const Home = () => {
     const signedIn: Array<SignIn & { name: string }> = [];
     const notInClass: Array<SignIn> = [];
 
-    for (const s of signins.data) {
+    for (const s of signins) {
       const name = idToName.get(s.studentID);
       if (!name) notInClass.push(s);
       else signedIn.push({ ...s, name });
     }
 
-    const signedInIDS = new Set(signins.data.map((s) => s.studentID));
+    const signedInIDS = new Set(signins.map((s) => s.studentID));
 
     const notSignedIn = selectedClass.students.filter(
       ({ studentID }) => !signedInIDS.has(studentID)
     );
 
     return { signedIn, notSignedIn, notInClass };
-  }, [signins.data, selectedClass, scannerName]);
+  }, [signins, selectedClass, scannerName]);
 
   useEffect(() => {
     const int = setInterval(() => setNow(new Date()), 1000);

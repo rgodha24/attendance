@@ -77,11 +77,11 @@ fn create_signin_handler() -> Sender<u64> {
     return signin_sender;
 }
 
-fn scan_line(line: String, sender: &Sender<u64>) {
+async fn scan_line(line: String, sender: &Sender<u64>) {
     match u64::from_str_radix(line.trim(), 10) {
         Ok(scanned) => {
             if 10_000 <= scanned && scanned <= 99_999 {
-                if let Err(_) = sender.blocking_send(scanned) {
+                if let Err(_) = sender.send(scanned).await {
                     println!("error sending student id to channel, scan again");
                 }
             } else {

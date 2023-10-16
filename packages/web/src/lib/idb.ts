@@ -1,6 +1,7 @@
 import { toast } from "@/components/ui/use-toast";
 import { createStore, getDefaultStore } from "jotai";
 import { scannerNameAtom, selectedClassAtom } from "./atoms";
+import { emitter } from "./events";
 
 export type SignIn = {
   scannerName: string;
@@ -121,7 +122,13 @@ export async function addSignIn(
     });
 
     transaction.oncomplete = () => {
-      if (invalidate) window.dispatchEvent(new CustomEvent("signin"));
+      if (invalidate) {
+        emitter.emit("signin", {
+          scannerName,
+          studentID,
+          time: new Date(time),
+        });
+      }
 
       const store = getDefaultStore();
       const currentClass = store.get(selectedClassAtom);

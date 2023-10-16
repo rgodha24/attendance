@@ -2,7 +2,7 @@ use crate::{CHOSEN_SERVER, SCANNER_NAME, UID};
 
 // only if we're in debug mode
 #[cfg(debug_assertions)]
-pub const SERVER_URL: &str = "https://evjh4pszof.execute-api.us-west-1.amazonaws.com";
+pub const SERVER_URL: &str = "https://08uhey83g5.execute-api.us-west-1.amazonaws.com";
 
 #[cfg(not(debug_assertions))]
 pub const SERVER_URL: &str = "https://api.batt.rgodha.com";

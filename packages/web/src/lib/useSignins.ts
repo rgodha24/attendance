@@ -1,17 +1,29 @@
-import { useQuery } from "@tanstack/react-query";
-import { getSignIns } from "./idb";
+import { SignIn, getSignIns } from "./idb";
+import { useStore } from "zustand";
+import { datesStore } from "./dates";
+import { useAtom } from "jotai";
+import { scannerNameAtom } from "./atoms";
+import { useEffect, useState } from "react";
+import { emitter } from "./events";
 
-export const useSignins = ({
-  scannerName,
-  start,
-  end,
-}: {
-  scannerName: string | undefined;
-  start: Date;
-  end: Date;
-}) =>
-  useQuery({
-    queryKey: ["signins", scannerName, start, end] as const,
-    queryFn: async ({ queryKey: [, scannerName, start, end] }) =>
-      !!scannerName ? getSignIns({ scannerName, start, end }) : [],
-  });
+export const useSignins = () => {
+  const { start, end } = useStore(datesStore);
+  const [scannerName] = useAtom(scannerNameAtom);
+
+  const [signIns, setSignIns] = useState<SignIn[]>([]);
+
+  useEffect(() =>
+    emitter.on("signin", async ({ scannerName: s, time }) => {
+      if (
+        scannerName !== undefined &&
+        s !== scannerName &&
+        time > start &&
+        time < end
+      ) {
+        setSignIns(await getSignIns({ scannerName, start, end }));
+      }
+    })
+  );
+
+  return signIns;
+};
