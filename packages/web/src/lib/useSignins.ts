@@ -23,7 +23,7 @@ export const useSignins = () => {
         setSignIns(await getSignIns({ scannerName, start, end }));
       }
     })
-  );
+    , [scannerName, start, end]);
 
   return signIns;
 };
