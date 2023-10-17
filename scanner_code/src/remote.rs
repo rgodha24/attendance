@@ -1,3 +1,4 @@
+use crate::{err, info, success};
 use crate::{CHOSEN_SERVER, SCANNER_NAME, UID};
 
 // only if we're in debug mode
@@ -19,8 +20,8 @@ pub async fn signin(user_id: u64, scanner_name: &str, student_id: u64) {
     let res = client.post(&url).query(&query).send().await;
 
     match res {
-        Ok(_) => println!("Successfully sent {student_id} to server"),
-        Err(e) => println!("Error sending {student_id} to server: {e}"),
+        Ok(_) => success!("Successfully sent {student_id} to server"),
+        Err(e) => err!("Error sending {student_id} to server: {e}"),
     }
 }
 
@@ -47,9 +48,9 @@ pub async fn change_uid(new: Option<u64>) {
                 *old_uid = new;
             }
 
-            println!("Successfully changed UID")
+            success!("Successfully changed UID")
         }
-        Err(e) => println!("Error changing UID: {}", e),
+        Err(e) => err!("Error changing UID: {}", e),
     }
 }
 
@@ -65,7 +66,7 @@ pub async fn scanner_ping() {
     let res = client.post(&url).query(&query).send().await;
 
     match res {
-        Ok(_) => println!("pinged server"),
-        Err(e) => println!("Error pinging server: {}", e),
+        Ok(_) => info!("pinged server"),
+        Err(e) => err!("Error pinging server: {}", e),
     }
 }

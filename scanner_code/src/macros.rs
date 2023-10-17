@@ -33,9 +33,9 @@ macro_rules! exit_handler {
 
         tokio::spawn(async move {
             while let Some(_) = exit_receiver.recv().await {
-                println!("Exiting...");
+                err!("Exiting...");
                 if uid!() == 0 {
-                    println!("No UID set, not sending to server");
+                    warn!("No UID set, not sending to server");
                     process::exit(0);
                 }
                 change_uid(None).await;

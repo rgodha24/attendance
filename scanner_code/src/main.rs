@@ -1,11 +1,16 @@
 #[macro_use]
 mod macros;
 mod remote;
+#[macro_use]
+pub mod colors;
 
 use clap::Parser;
 use lazy_static::lazy_static;
 use remote::{change_uid, scanner_ping, signin, SERVER_URL};
-use std::{process, sync::OnceLock};
+use std::{
+    process,
+    sync::{Arc, OnceLock},
+};
 use tokio::sync::{
     mpsc::{channel, Sender},
     Mutex,
@@ -29,6 +34,7 @@ lazy_static! {
 #[derive(Parser)]
 #[command(version, about, long_about=None)]
 struct Args {
+    /// the name of the scanner (e.g. "IC", "Piper 201", etc.)
     scanner_name: String,
     #[arg(short, long, default_value = SERVER_URL)]
     server_url: String,
@@ -44,15 +50,15 @@ async fn main() {
     exit_handler!();
     // scanner_ping!();
 
-    let signin_sender = create_signin_handler();
+    let signin_sender = Arc::new(create_signin_handler());
 
-    println!("using server_url = {}", CHOSEN_SERVER.get().unwrap());
+    info!("using server_url = {}", CHOSEN_SERVER.get().unwrap());
 
     loop {
         let mut line = String::new();
 
         if let Err(e) = std::io::stdin().read_line(&mut line) {
-            println!("Error reading line: {}", e);
+            err!("Error reading line: {}", e);
             continue;
         }
 
@@ -67,7 +73,7 @@ fn create_signin_handler() -> Sender<u64> {
         while let Some(id) = signin_receiver.recv().await {
             let user_id = { uid!() };
             if user_id == 0 {
-                println!("No UID set, not sending id {id}");
+                err!("No UID set, not sending id {id}");
                 continue;
             }
             signin(user_id, scanner_name!(), id).await;
@@ -77,15 +83,16 @@ fn create_signin_handler() -> Sender<u64> {
     return signin_sender;
 }
 
-async fn scan_line(line: String, sender: &Sender<u64>) {
+fn scan_line(line: String, sender: &Arc<Sender<u64>>) {
     match u64::from_str_radix(line.trim(), 10) {
         Ok(scanned) => {
             if 10_000 <= scanned && scanned <= 99_999 {
-                if let Err(_) = sender.send(scanned).await {
-                    println!("error sending student id to channel, scan again");
-                }
+                let sender = sender.clone();
+                tokio::spawn(async move {
+                    sender.send(scanned).await.unwrap();
+                });
             } else {
-                println!("Invalid input: {}/{}", line, scanned);
+                err!("Invalid input: {}/{}", line, scanned);
                 return;
             }
         }
@@ -94,12 +101,12 @@ async fn scan_line(line: String, sender: &Sender<u64>) {
                 if MIN_UID <= uid && uid < MAX_UID {
                     tokio::spawn(change_uid(Some(uid)));
                 } else {
-                    println!("Invalid input: {}/{}", line, uid);
+                    err!("Invalid input: {}/{}", line, uid);
                     return;
                 }
             }
             Err(second) => {
-                println!("Invalid input: {}. errors: {} {}", line, first, second);
+                err!("Invalid input: {}. errors: {} {}", line, first, second);
                 return;
             }
         },
