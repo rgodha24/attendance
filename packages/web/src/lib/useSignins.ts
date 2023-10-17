@@ -12,18 +12,15 @@ export const useSignins = () => {
 
   const [signIns, setSignIns] = useState<SignIn[]>([]);
 
-  useEffect(() =>
-    emitter.on("signin", async ({ scannerName: s, time }) => {
-      if (
-        scannerName !== undefined &&
-        s !== scannerName &&
-        time > start &&
-        time < end
-      ) {
-        setSignIns(await getSignIns({ scannerName, start, end }));
-      }
-    })
-    , [scannerName, start, end]);
+  useEffect(
+    () =>
+      emitter.on("signin", async ({ scannerName: s, time }) => {
+        if (s === scannerName && time > start && time < end) {
+          setSignIns(await getSignIns({ scannerName, start, end }));
+        }
+      }),
+    [scannerName, start, end]
+  );
 
   return signIns;
 };

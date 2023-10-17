@@ -34,10 +34,6 @@ export function Root() {
   });
 
   useEffect(() => {
-    window.addEventListener("signin", () => {
-      console.log("invalidating queries");
-      queryClient.invalidateQueries(["signins"]);
-    });
     window.addEventListener("scanner", () => {
       console.log("invalidating queries");
       queryClient.invalidateQueries(["scanners"]);

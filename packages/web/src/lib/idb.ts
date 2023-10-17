@@ -107,7 +107,7 @@ export async function addSignIn(
     id: string;
     studentID: number;
   },
-  invalidate = false
+  invalidate = true
 ) {
   return new Promise<void>(async (resolve, reject) => {
     const db = await getDB();
