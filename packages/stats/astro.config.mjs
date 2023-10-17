@@ -4,6 +4,6 @@ import aws from "astro-sst/lambda";
 
 export default defineConfig({
   integrations: [tailwind()],
-  mode: "server",
+  output: "server",
   adapter: aws(),
 });
