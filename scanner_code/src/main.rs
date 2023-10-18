@@ -50,6 +50,24 @@ async fn main() {
     exit_handler!();
     // scanner_ping!();
 
+    let uid_from_file = match tokio::fs::read_to_string(uid_file!())
+        .await
+        .map_err(|e| e.kind())
+        .map(|u| u64::from_str_radix(&u, 10))
+    {
+        Err(tokio::io::ErrorKind::NotFound) => {
+            tokio::fs::create_dir_all(data_dir!()).await.unwrap();
+            0
+        }
+        Ok(Ok(0)) | Err(_) | Ok(Err(_)) => 0,
+        Ok(Ok(n)) => {
+            info!("using user id = {}", n);
+            n
+        }
+    };
+
+    *UID.lock().await = uid_from_file;
+
     let signin_sender = Arc::new(create_signin_handler());
 
     info!("using server_url = {}", CHOSEN_SERVER.get().unwrap());

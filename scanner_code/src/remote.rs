@@ -42,6 +42,14 @@ pub async fn change_uid(new: Option<u64>) {
     }
 
     let res = client.post(&url).query(&query).send().await;
+
+    if let Some(uid) = new {
+        // theoretically should be in parallel with the above one, but honestly it shouldn't matter
+        let _ = tokio::fs::write(uid_file!(), uid.to_string())
+            .await
+            .unwrap();
+    }
+
     match res {
         Ok(_) => {
             if let Some(new) = new {

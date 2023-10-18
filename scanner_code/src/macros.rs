@@ -22,6 +22,24 @@ macro_rules! uid {
     };
 }
 
+macro_rules! data_dir {
+    () => {
+        project_dir!().data_dir().to_path_buf()
+    };
+}
+
+macro_rules! project_dir {
+    () => {
+        directories::ProjectDirs::from("com", "rgodha", "scanner_code").unwrap()
+    };
+}
+
+macro_rules! uid_file {
+    () => {
+        data_dir!().join("uid.txt")
+    };
+}
+
 macro_rules! exit_handler {
     () => {
         let (exit_sender, mut exit_receiver) = channel::<()>(10);
@@ -33,7 +51,7 @@ macro_rules! exit_handler {
 
         tokio::spawn(async move {
             while let Some(_) = exit_receiver.recv().await {
-                err!("Exiting...");
+                info!("Exiting...");
                 if uid!() == 0 {
                     warn!("No UID set, not sending to server");
                     process::exit(0);
