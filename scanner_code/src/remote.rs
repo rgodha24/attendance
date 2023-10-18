@@ -1,4 +1,8 @@
-use crate::{err, info, success};
+use firebase_rs::Firebase;
+use std::sync::atomic::Ordering;
+use std::sync::OnceLock;
+
+use crate::{err, info, success, SEND_TO_FIREBASE};
 use crate::{CHOSEN_SERVER, SCANNER_NAME, UID};
 
 // only if we're in debug mode
@@ -17,11 +21,33 @@ pub async fn signin(user_id: u64, scanner_name: &str, student_id: u64) {
         ("studentID", &student_id.to_string()),
     ];
 
-    let res = client.post(&url).query(&query).send().await;
+    let (res, _firebase) = tokio::join!(
+        client.post(&url).query(&query).send(),
+        signin_firebase(&student_id)
+    );
 
     match res {
         Ok(_) => success!("Successfully sent {student_id} to server"),
         Err(e) => err!("Error sending {student_id} to server: {e}"),
+    }
+}
+
+async fn signin_firebase(student_id: &u64) {
+    if !SEND_TO_FIREBASE.load(Ordering::Relaxed) {
+        return;
+    }
+
+    let client = Firebase::new("https://brophyattendance.firebaseio.com")
+        .expect("firebase url exists");
+
+    let data = serde_json::json!({
+        "id": *student_id,
+        "time": {".sv": "timestamp"}
+    });
+
+    match client.at("sign-in").set(&data).await {
+        Ok(r) => success!("Successfully sent {student_id} to firebase {:?}",r),
+        Err(e) => err!("Error sending {student_id} to firebase: {e}"),
     }
 }
 

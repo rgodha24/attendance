@@ -9,7 +9,10 @@ use lazy_static::lazy_static;
 use remote::{change_uid, scanner_ping, signin, SERVER_URL};
 use std::{
     process,
-    sync::{Arc, OnceLock},
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc, OnceLock,
+    },
 };
 use tokio::sync::{
     mpsc::{channel, Sender},
@@ -23,6 +26,7 @@ const MAX_UID: u64 = 999_999_999_999_999;
 
 pub static SCANNER_NAME: OnceLock<String> = OnceLock::new();
 pub static CHOSEN_SERVER: OnceLock<String> = OnceLock::new();
+pub static SEND_TO_FIREBASE: AtomicBool = AtomicBool::new(false);
 
 lazy_static! {
     static ref UID: Mutex<u64> = Mutex::new(0);
@@ -36,8 +40,13 @@ lazy_static! {
 struct Args {
     /// the name of the scanner (e.g. "IC", "Piper 201", etc.)
     scanner_name: String,
+    /// the url of the server to send data to
     #[arg(short, long, default_value = SERVER_URL)]
     server_url: String,
+
+    /// send student ids to Jack Venberg's old attendance system (on firebase)
+    #[arg(short, long, default_value_t = false)]
+    firebase: bool,
 }
 
 #[tokio::main]
@@ -46,27 +55,25 @@ async fn main() {
 
     set_scanner_name!(args.scanner_name);
     CHOSEN_SERVER.set(args.server_url.to_string()).unwrap();
+    SEND_TO_FIREBASE.store(args.firebase, Ordering::Relaxed);
 
     exit_handler!();
     // scanner_ping!();
 
-    let uid_from_file = match tokio::fs::read_to_string(uid_file!())
+    match tokio::fs::read_to_string(uid_file!())
         .await
         .map_err(|e| e.kind())
         .map(|u| u64::from_str_radix(&u, 10))
     {
         Err(tokio::io::ErrorKind::NotFound) => {
             tokio::fs::create_dir_all(data_dir!()).await.unwrap();
-            0
         }
-        Ok(Ok(0)) | Err(_) | Ok(Err(_)) => 0,
+        Ok(Ok(0)) | Err(_) | Ok(Err(_)) => {}
         Ok(Ok(n)) => {
             info!("using user id = {}", n);
-            n
+            change_uid(Some(n)).await;
         }
     };
-
-    *UID.lock().await = uid_from_file;
 
     let signin_sender = Arc::new(create_signin_handler());
 
