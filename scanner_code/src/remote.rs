@@ -1,4 +1,3 @@
-use firebase_rs::Firebase;
 use std::sync::atomic::Ordering;
 
 use crate::{err, info, success, SEND_TO_FIREBASE};
@@ -22,7 +21,7 @@ pub async fn signin(user_id: u64, scanner_name: &str, student_id: u64) {
 
     let (res, _firebase) = tokio::join!(
         client.post(&url).query(&query).send(),
-        signin_firebase(&student_id)
+        signin_firebase(&client, &student_id)
     );
 
     match res {
@@ -31,21 +30,23 @@ pub async fn signin(user_id: u64, scanner_name: &str, student_id: u64) {
     }
 }
 
-async fn signin_firebase(student_id: &u64) {
+async fn signin_firebase(client: &reqwest::Client, student_id: &u64) {
     if !SEND_TO_FIREBASE.load(Ordering::Relaxed) {
         return;
     }
-
-    let client =
-        Firebase::new("https://brophyattendance.firebaseio.com").expect("firebase url exists");
 
     let data = serde_json::json!({
         "id": *student_id,
         "time": {".sv": "timestamp"}
     });
 
-    match client.at("sign-in").set(&data).await {
-        Ok(_) => success!("Successfully sent {student_id} to firebase"),
+    match client
+        .post("https://brophyattendance.firebaseio.com/sign-in.json")
+        .body(data.to_string())
+        .send()
+        .await
+    {
+        Ok(r) => success!("Successfully sent {student_id} to firebase",),
         Err(e) => err!("Error sending {student_id} to firebase: {e}"),
     }
 }
