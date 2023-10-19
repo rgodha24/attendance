@@ -1,6 +1,5 @@
 use firebase_rs::Firebase;
 use std::sync::atomic::Ordering;
-use std::sync::OnceLock;
 
 use crate::{err, info, success, SEND_TO_FIREBASE};
 use crate::{CHOSEN_SERVER, SCANNER_NAME, UID};
@@ -37,8 +36,8 @@ async fn signin_firebase(student_id: &u64) {
         return;
     }
 
-    let client = Firebase::new("https://brophyattendance.firebaseio.com")
-        .expect("firebase url exists");
+    let client =
+        Firebase::new("https://brophyattendance.firebaseio.com").expect("firebase url exists");
 
     let data = serde_json::json!({
         "id": *student_id,
@@ -46,7 +45,7 @@ async fn signin_firebase(student_id: &u64) {
     });
 
     match client.at("sign-in").set(&data).await {
-        Ok(r) => success!("Successfully sent {student_id} to firebase {:?}",r),
+        Ok(_) => success!("Successfully sent {student_id} to firebase"),
         Err(e) => err!("Error sending {student_id} to firebase: {e}"),
     }
 }
@@ -71,9 +70,7 @@ pub async fn change_uid(new: Option<u64>) {
 
     if let Some(uid) = new {
         // theoretically should be in parallel with the above one, but honestly it shouldn't matter
-        let _ = tokio::fs::write(uid_file!(), uid.to_string())
-            .await
-            .unwrap();
+        let _ = tokio::fs::write(uid_file!(), uid.to_string()).await;
     }
 
     match res {

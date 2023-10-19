@@ -1,6 +1,6 @@
 {
   "name": "@attendance/trpc",
-  "version": "0.0.0",
+  "version": "0.4.1",
   "type": "module",
   "scripts": {
     "test": "sst bind vitest",
