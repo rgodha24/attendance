@@ -31,6 +31,27 @@ export async function create(args: Omit<ClassInner, "classID">) {
   return class_.data;
 }
 
+export async function edit(
+  args: Pick<
+    ClassInner,
+    "name" | "students" | "period" | "classID" | "userID" | "semester"
+  >
+) {
+  const class_ = await ClassEntity.patch({
+    classID: args.classID,
+    userID: args.userID,
+  })
+    .set({
+      name: args.name,
+      students: args.students,
+      period: args.period,
+      semester: args.semester,
+    })
+    .go();
+
+  return class_.data;
+}
+
 export async function addStudent({
   classID,
   userID,

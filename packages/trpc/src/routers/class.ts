@@ -23,6 +23,7 @@ export const classRouter = router({
       let schoolYear = new Date().getFullYear();
       // if it's before may, it's the previous school year still
       if (new Date().getMonth() < 5) schoolYear--;
+
       const students = input.students.map((student) => ({
         ...student,
         email: student.email || "",
@@ -36,6 +37,25 @@ export const classRouter = router({
       });
 
       return res.classID;
+    }),
+
+  edit: privateProcedure
+    .input(
+      z.object({
+        students: z.array(studentParser),
+        period: z.string(),
+        semester: z.enum(["fall", "spring", "other"]),
+        name: z.string().min(2),
+        classID: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const students = input.students.map((student) => ({
+        ...student,
+        email: student.email || "",
+      }));
+
+      await Class.edit({ ...input, userID: ctx.userID, students });
     }),
 
   addStudent: privateProcedure

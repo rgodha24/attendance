@@ -12,7 +12,7 @@ import {
 } from "./ui/select";
 import { AddClass } from "@/routes/addClass";
 import { Button } from "./ui/button";
-import { Loader2, MinusCircle, PlusCircle } from "lucide-react";
+import { Loader2, MinusCircle, PencilIcon, PlusCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { DialogOverlay } from "@radix-ui/react-dialog";
 import { trpc } from "@/lib/trpc";
@@ -21,6 +21,7 @@ import { scannerNameAtom, selectedClassAtom } from "@/lib/atoms";
 import { uidAtom } from "@/token";
 import { redirect } from "@tanstack/react-router";
 import { Badge } from "./ui/badge";
+import { EditClass } from "@/routes/editClass";
 
 export const ScannerSelect: FC<{ scanners: string[] }> = ({ scanners }) => {
   const [scannerName, setScannerName] = useAtom(scannerNameAtom);
@@ -29,7 +30,10 @@ export const ScannerSelect: FC<{ scanners: string[] }> = ({ scanners }) => {
     initialData: [],
   });
 
-  if (!uid) { redirect({ to: "/login", replace: true }); return }
+  if (!uid) {
+    redirect({ to: "/login", replace: true });
+    return;
+  }
   return (
     <Dialog>
       <Select
@@ -122,7 +126,8 @@ export const ScannerSelect: FC<{ scanners: string[] }> = ({ scanners }) => {
 export const ClassSelect: FC<{ classes: Class[] }> = ({ classes }) => {
   const [selectedClass, setSelectedClass] = useAtom(selectedClassAtom);
   const [dialog, setDialog] = useState(false);
-  const [dialogStyle, setDialogStyle] = useState<"add" | "del">("add");
+  const [dialogStyle, setDialogStyle] = useState<"add" | "del" | "edit">("add");
+  const [classIndex, setClassIndex] = useState<number>(0);
   const [delClass, setDelClass] = useState<Class>();
 
   return (
@@ -159,7 +164,21 @@ export const ClassSelect: FC<{ classes: Class[] }> = ({ classes }) => {
                   key={class_.classID}
                   value={class_.classID}
                   after={
-                    <div className="py-1">
+                    <>
+                      <DialogTrigger>
+                        <Button
+                          variant="outline"
+                          type="button"
+                          size="icon"
+                          className="rounded-full group"
+                          onClick={() => {
+                            setDialogStyle("edit");
+                            setClassIndex(i);
+                          }}
+                        >
+                          <PencilIcon className="w-4 h-4 dark:group-hover:stroke-blue-400 group-hover:stroke-blue-600" />
+                        </Button>
+                      </DialogTrigger>
                       <DialogTrigger>
                         <Button
                           size="icon"
@@ -173,7 +192,7 @@ export const ClassSelect: FC<{ classes: Class[] }> = ({ classes }) => {
                           <MinusCircle className="w-4 h-4 dark:group-hover:stroke-red-400 group-hover:stroke-red-600" />
                         </Button>
                       </DialogTrigger>
-                    </div>
+                    </>
                   }
                 >
                   {class_.name}
@@ -188,6 +207,11 @@ export const ClassSelect: FC<{ classes: Class[] }> = ({ classes }) => {
               <AddClass onSuccess={() => setDialog(false)} />
             ) : dialogStyle === "del" ? (
               <DeleteClass onSuccess={() => setDialog(false)} {...delClass!} />
+            ) : dialogStyle === "edit" ? (
+              <EditClass
+                onSuccess={() => setDialog(false)}
+                old={classes[classIndex]}
+              />
             ) : null}
           </DialogContent>
         </DialogOverlay>

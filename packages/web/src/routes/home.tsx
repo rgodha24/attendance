@@ -32,6 +32,8 @@ export type Class = {
   name: string;
   students: { studentID: number; name: string }[];
   classID: string;
+  period: string;
+  semester: "fall" | "spring" | "other";
 };
 
 export const Home = () => {

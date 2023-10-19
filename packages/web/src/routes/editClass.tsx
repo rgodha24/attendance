@@ -16,36 +16,38 @@ import {
 import {
   type Form as FormType,
   formSchema,
-  getCurrentSemester,
   SemesterField,
   ClassNameField,
   PeriodField,
   StudentsFields,
   Csv,
 } from "./classForm";
+import { Class } from "./home";
 
-export const AddClass: FC<{ onSuccess?: () => void }> = ({ onSuccess }) => {
+export const EditClass: FC<{ onSuccess?: () => void; old: Class }> = ({
+  onSuccess,
+  old,
+}) => {
   const toast = useToast();
 
   const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      students: [{ name: "", studentID: "" as any }],
-      semester: getCurrentSemester(),
-      name: "",
-      // TODO: when calendar integration is done, set default period
-      period: "",
+      name: old.name,
+      students: old.students,
+      semester: old.semester,
+      period: old.period,
     },
   });
 
   const students = useFieldArray({ control: form.control, name: "students" });
   const utils = trpc.useContext();
 
-  const mut = trpc.class.create.useMutation({
+  const mut = trpc.class.edit.useMutation({
     onSuccess: (_data, { name }) => {
       toast.toast({
-        title: `Class created successfully!`,
-        description: `Class ${name} was created successfully!`,
+        title: `Class edited successfully!`,
+        description: `Class ${name} was edited successfully!`,
       });
       // this syntax is so ugly god damn
       onSuccess?.();
@@ -56,12 +58,14 @@ export const AddClass: FC<{ onSuccess?: () => void }> = ({ onSuccess }) => {
     onError: (err) => {
       toast.toast({
         variant: "destructive",
-        title: "Error creating class",
-        description: `There was an error creating the class on the backend: ${err.message}`,
+        title: "Error editing class",
+        description: `There was an error editing the class on the backend: ${err.message}`,
         action: (
           <ToastAction
             altText="retry"
-            onClick={() => mut.mutate(form.getValues())}
+            onClick={() =>
+              mut.mutate({ ...form.getValues(), classID: old.classID })
+            }
           >
             Retry
           </ToastAction>
@@ -71,15 +75,16 @@ export const AddClass: FC<{ onSuccess?: () => void }> = ({ onSuccess }) => {
   });
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log(data);
-    mut.mutate(data);
+    mut.mutate({ ...data, classID: old.classID });
   };
 
   return (
     <>
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(onSubmit, (err) =>
+            console.log("err", err)
+          )}
           className="px-4 space-y-4 min-w-3/4"
         >
           <SemesterField {...form} />
