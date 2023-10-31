@@ -22,5 +22,13 @@ export const useSignins = () => {
     [scannerName, start, end]
   );
 
+  useEffect(() => {
+    (async () => {
+      setSignIns(
+        await getSignIns({ scannerName: scannerName || "", start, end })
+      );
+    })();
+  }, [scannerName, start, end]);
+
   return signIns;
 };
