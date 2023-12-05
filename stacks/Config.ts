@@ -19,7 +19,11 @@ export function ConfigStack({ stack }: StackContext) {
         : "http://localhost:5173",
   });
 
-  api.bind([wsURL, frontendURL, ws]);
+  const posthogKey = new Config.Secret(stack, "POSTHOG_API_KEY");
+
+  const stage = new Config.Parameter(stack, "stage", { value: stack.stage });
+
+  api.bind([wsURL, frontendURL, ws, posthogKey, stage]);
   ws.bind([wsURL]);
 
   stack.addOutputs({

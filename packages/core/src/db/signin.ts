@@ -1,6 +1,7 @@
 import { EntityRecord } from "electrodb";
 import { SignInEntity } from "./schema";
 import { ulid } from "ulid";
+import { signin } from "../analytics";
 
 export * as SignIn from "./signin";
 
@@ -12,6 +13,8 @@ export async function create(args: Omit<SignInInner, "time" | "signInID">) {
     signInID: ulid(),
     ...args,
   }).go();
+
+  await signin({ scannerName: args.scannerName, id: res.data.signInID });
 
   return res.data;
 }
