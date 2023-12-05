@@ -7,13 +7,13 @@ const client = new PostHog(Config.POSTHOG_API_KEY, {
 
 export const signin = async ({
   scannerName,
-  id,
+  id: uid,
 }: {
   scannerName: string;
   id: string;
 }) => {
   client.capture({
-    distinctId: id,
+    distinctId: uid,
     event: "signin",
     properties: {
       scannerName,

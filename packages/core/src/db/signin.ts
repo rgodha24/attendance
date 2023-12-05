@@ -14,7 +14,7 @@ export async function create(args: Omit<SignInInner, "time" | "signInID">) {
     ...args,
   }).go();
 
-  await signin({ scannerName: args.scannerName, id: res.data.signInID });
+  await signin({ scannerName: args.scannerName, id: args.userID.toString() });
 
   return res.data;
 }
