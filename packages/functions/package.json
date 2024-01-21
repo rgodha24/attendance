@@ -3,14 +3,12 @@
   "version": "0.4.2",
   "type": "module",
   "scripts": {
-    "test": "sst bind vitest",
     "typecheck": "tsc -noEmit"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.119",
     "@types/node": "^20.5.1",
-    "sst": "2.38.7",
-    "vitest": "^0.34.6"
+    "sst": "2.39.7"
   },
   "dependencies": {
     "@attendance/trpc": "workspace:*",
