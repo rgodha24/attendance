@@ -13,11 +13,12 @@ export const handler = ApiHandler(async (req) => {
       .max(1 * 10 ** 15),
   });
 
-  const data = schema.safeParse(req.queryStringParameters);
+  const res = schema.safeParse(req.queryStringParameters);
+  if (!res.success) {
+    return { statusCode: 400, body: res.error.message };
+  }
 
-  if (!data.success) return { statusCode: 400, body: data.error.message };
-
-  const signin = await SignIn.create(data.data);
+  const signin = await SignIn.create(res.data);
   console.table(signin);
 
   await sendMessage(signin.userID, {
