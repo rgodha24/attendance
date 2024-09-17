@@ -33,6 +33,8 @@ const ensureLoggedIn = () => {
     token !== null && token.length > 0 && token !== "undefined";
 
   if (!isLoggedIn) {
+    console.log("not logged in");
+    localStorage.setItem("token", "");
     throw redirect({
       to: "/login",
       search: {
@@ -41,7 +43,15 @@ const ensureLoggedIn = () => {
     });
   }
 
-  console.log("after");
+  const parsedToken = JSON.parse(atob(token.split(".")[1]));
+  const isExpired = Math.floor(new Date().getTime() / 1000) > parsedToken.iat;
+  if (isExpired) {
+    console.log("expired");
+    localStorage.setItem("token", "");
+    throw redirect({
+      to: "/login",
+    });
+  }
 };
 
 const rootRoute = new RootRoute({
@@ -61,7 +71,7 @@ const loginRoute = new Route({
   component: Login,
   beforeLoad: () => {
     const token = localStorage.getItem("token");
-    if (token) router.history.push("/");
+    if (token?.length !== 0) router.history.push("/");
   },
 });
 
