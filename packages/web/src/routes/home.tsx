@@ -126,7 +126,7 @@ const DeduplicateButton: FC<{}> = () => {
   const [deduplicated, setDeduplicated] = useAtom(deduplicateAtom);
 
   return (
-    <div className="min-w-4">
+    <div className="min-w-fit">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger tabIndex={-1}>
@@ -156,7 +156,7 @@ const ResetTimeButton: FC<{}> = () => {
   const { setTimes } = useStore(datesStore, ({ setTimes }) => ({ setTimes }));
 
   return (
-    <div className="min-w-4">
+    <div className="min-w-fit">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -196,7 +196,7 @@ const FetchFromServerButton: FC<{
   lastUpdated: number;
   now: Date;
 }> = ({ onClick, isSubmitting, lastUpdated, now }) => (
-  <div className="justify-start min-w-4">
+  <div className="justify-start min-w-fit">
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
