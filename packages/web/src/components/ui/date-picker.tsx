@@ -26,7 +26,7 @@ export function DateTimePicker({
           variant={"outline"}
           className={cn(
             "min-w-[200px] justify-start text-left font-normal",
-            !date && "text-muted-foreground"
+            !date && "text-muted-foreground",
           )}
         >
           <CalendarIcon className="mr-2 w-4 h-4" />
@@ -46,14 +46,13 @@ export function DateTimePicker({
                     newdate.getMonth(),
                     newdate.getDate(),
                     date.getHours(),
-                    date.getMinutes()
-                  )
+                    date.getMinutes(),
+                  ),
                 );
             }}
           />
         </div>
         <div className="flex flex-row gap-x-4 justify-between rounded-md border">
-          {/* TODO: make this not suck ??? */}
           <Input
             type="time"
             onChange={(event) => {
@@ -63,11 +62,12 @@ export function DateTimePicker({
                 setDate((d) =>
                   setMinutes(
                     setHours(d, date.getUTCHours()),
-                    date.getUTCMinutes()
-                  )
+                    date.getUTCMinutes(),
+                  ),
                 );
               }
             }}
+            value={format(date, "HH:mm")}
           />
         </div>
       </PopoverContent>

@@ -29,6 +29,7 @@ export const ScannerSelect: FC<{ scanners: string[] }> = ({ scanners }) => {
   const connectedScanners = trpc.scanner.connected.useQuery(undefined, {
     initialData: [],
   });
+  const [selectOpen, setSelectOpen] = useState(false);
 
   if (!uid) {
     redirect({ to: "/login", replace: true });
@@ -40,6 +41,8 @@ export const ScannerSelect: FC<{ scanners: string[] }> = ({ scanners }) => {
         onValueChange={(name) => {
           setScannerName(name);
         }}
+        open={selectOpen}
+        onOpenChange={setSelectOpen}
       >
         <SelectTrigger>
           <SelectValue>
@@ -70,7 +73,7 @@ export const ScannerSelect: FC<{ scanners: string[] }> = ({ scanners }) => {
           <SelectGroup>
             <SelectLabel className="flex flex-row justify-between items-center">
               <h3 className="font-medium text-md">Scanners: </h3>
-              <DialogTrigger>
+              <DialogTrigger onClick={() => setSelectOpen(false)}>
                 <Button
                   variant="outline"
                   type="button"
@@ -125,18 +128,21 @@ export const ScannerSelect: FC<{ scanners: string[] }> = ({ scanners }) => {
 
 export const ClassSelect: FC<{ classes: Class[] }> = ({ classes }) => {
   const [selectedClass, setSelectedClass] = useAtom(selectedClassAtom);
-  const [dialog, setDialog] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectOpen, setSelectOpen] = useState(false);
   const [dialogStyle, setDialogStyle] = useState<"add" | "del" | "edit">("add");
   const [classIndex, setClassIndex] = useState<number>(0);
   const [delClass, setDelClass] = useState<Class>();
 
   return (
     <>
-      <Dialog open={dialog} onOpenChange={setDialog}>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <Select
           onValueChange={(name) => {
             setSelectedClass(classes.find((class_) => class_.classID === name));
           }}
+          open={selectOpen}
+          onOpenChange={setSelectOpen}
         >
           <SelectTrigger>
             <SelectValue>
@@ -153,7 +159,10 @@ export const ClassSelect: FC<{ classes: Class[] }> = ({ classes }) => {
                     type="button"
                     size="icon"
                     className="rounded-full group"
-                    onClick={() => setDialogStyle("add")}
+                    onClick={() => {
+                      setDialogStyle("add");
+                      setSelectOpen(false);
+                    }}
                   >
                     <PlusCircle className="w-4 h-4 dark:group-hover:stroke-green-400 group-hover:stroke-green-600" />
                   </Button>
@@ -174,6 +183,7 @@ export const ClassSelect: FC<{ classes: Class[] }> = ({ classes }) => {
                           onClick={() => {
                             setDialogStyle("edit");
                             setClassIndex(i);
+                            setSelectOpen(false);
                           }}
                         >
                           <PencilIcon className="w-4 h-4 dark:group-hover:stroke-blue-400 group-hover:stroke-blue-600" />
@@ -186,6 +196,7 @@ export const ClassSelect: FC<{ classes: Class[] }> = ({ classes }) => {
                           onClick={() => {
                             setDialogStyle("del");
                             setDelClass(classes[i]);
+                            setSelectOpen(false);
                           }}
                           className="rounded-full group"
                         >
@@ -204,12 +215,15 @@ export const ClassSelect: FC<{ classes: Class[] }> = ({ classes }) => {
         <DialogOverlay>
           <DialogContent>
             {dialogStyle === "add" ? (
-              <AddClass onSuccess={() => setDialog(false)} />
+              <AddClass onSuccess={() => setDialogOpen(false)} />
             ) : dialogStyle === "del" ? (
-              <DeleteClass onSuccess={() => setDialog(false)} {...delClass!} />
+              <DeleteClass
+                onSuccess={() => setDialogOpen(false)}
+                {...delClass!}
+              />
             ) : dialogStyle === "edit" ? (
               <EditClass
-                onSuccess={() => setDialog(false)}
+                onSuccess={() => setDialogOpen(false)}
                 old={classes[classIndex]}
               />
             ) : null}
@@ -225,7 +239,8 @@ const DeleteClass: FC<Class & { onSuccess: () => void }> = ({
   name,
   onSuccess,
 }) => {
-  const utils = trpc.useContext();
+  const utils = trpc.useUtils();
+  const [selectedClass, setSelectedClass] = useAtom(selectedClassAtom);
   const deleteClass = trpc.class.delete.useMutation({
     onSuccess: () => {
       toast({
@@ -234,6 +249,9 @@ const DeleteClass: FC<Class & { onSuccess: () => void }> = ({
       });
       onSuccess();
       utils.class.getAll.refetch();
+      if (selectedClass?.classID === classID) {
+        setSelectedClass(undefined);
+      }
     },
   });
 

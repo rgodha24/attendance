@@ -33,7 +33,7 @@ export function ThemeProvider({
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme,
   );
 
   useEffect(() => {
@@ -41,14 +41,12 @@ export function ThemeProvider({
 
     const switcher = document.getElementById("themeSwitcher");
 
-    // @ts-expect-error view transitions
     if (!document.startViewTransition || !switcher) {
       root.classList.remove("light", "dark");
       root.classList.add(theme);
       return;
     }
 
-    // @ts-expect-error view transitions
     const transition = document.startViewTransition(() => {
       root.classList.remove("light", "dark");
       root.classList.add(theme);
@@ -57,10 +55,11 @@ export function ThemeProvider({
     const rect = switcher.getBoundingClientRect();
     const x = rect.x + rect.width / 2;
     const y = rect.y + rect.height / 2;
+    console.log({ x, y });
 
     const endRadius = Math.hypot(
       Math.max(x, innerWidth - x),
-      Math.max(y, innerHeight - y)
+      Math.max(y, innerHeight - y),
     );
 
     /**
@@ -83,10 +82,10 @@ export function ThemeProvider({
             theme === "dark"
               ? "::view-transition-old(root)"
               : "::view-transition-new(root)",
-        }
+        },
       );
-    }, [theme]);
-  });
+    });
+  }, [theme]);
 
   const value = {
     theme,

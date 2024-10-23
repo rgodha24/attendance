@@ -61,7 +61,10 @@ export const Home = () => {
       return { signedIn: [], notSignedIn: [], notInClass: signins };
 
     const idToName = new Map(
-      selectedClass.students.map((student) => [student.studentID, student.name])
+      selectedClass.students.map((student) => [
+        student.studentID,
+        student.name,
+      ]),
     );
 
     const signedIn: Array<SignIn & { name: string }> = [];
@@ -76,7 +79,7 @@ export const Home = () => {
     const signedInIDS = new Set(signins.map((s) => s.studentID));
 
     const notSignedIn = selectedClass.students.filter(
-      ({ studentID }) => !signedInIDS.has(studentID)
+      ({ studentID }) => !signedInIDS.has(studentID),
     );
 
     return { signedIn, notSignedIn, notInClass };
@@ -99,7 +102,7 @@ export const Home = () => {
 
   return (
     <>
-      <div className="flex flex-row gap-x-4 justify-between mx-4">
+      <div className="flex flex-row gap-x-2 justify-between mx-4">
         <ResetTimeButton />
         <DateTimePicker date={start} setDate={setStart} />
         <ClassSelect classes={classes.data} />
@@ -167,7 +170,7 @@ const ResetTimeButton: FC<{}> = () => {
               onClick={() => {
                 setTimes(
                   setMinutes(new Date(), new Date().getMinutes() - 10),
-                  setHours(new Date(), new Date().getHours() + 1)
+                  setHours(new Date(), new Date().getHours() + 1),
                 );
                 toast({
                   title: "reset time successfully",

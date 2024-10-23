@@ -39,7 +39,7 @@ export const AddClass: FC<{ onSuccess?: () => void }> = ({ onSuccess }) => {
   });
 
   const students = useFieldArray({ control: form.control, name: "students" });
-  const utils = trpc.useContext();
+  const utils = trpc.useUtils();
 
   const mut = trpc.class.create.useMutation({
     onSuccess: (_data, { name }) => {
